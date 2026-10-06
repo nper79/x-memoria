@@ -181,7 +181,7 @@ async function sb(path, opts = {}) {
   const c = cfg();
   const res = await fetch(`${c.supabaseUrl}/rest/v1/${path}`, {
     ...opts,
-    headers: { apikey: c.supabaseKey, Authorization: `Bearer ${c.supabaseKey}`, 'Content-Type': 'application/json', ...(opts.headers || {}) }
+    headers: { apikey: c.supabaseKey, ...(c.supabaseKey.startsWith('eyJ') ? { Authorization: `Bearer ${c.supabaseKey}` } : {}), 'Content-Type': 'application/json', ...(opts.headers || {}) }
   });
   if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
   const body = await res.text();
