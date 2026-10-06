@@ -226,6 +226,15 @@
       .reader h2 { font-size: 36px; }
       .chat-fab { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); }
     }
+  
+    .reveal-wrap { position: relative; }
+    .reveal-wrap input { padding-right: 84px; }
+    .reveal-btn {
+      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      font: 11px/1 ui-monospace, "JetBrains Mono", monospace; letter-spacing: .05em; text-transform: uppercase;
+      background: none; border: 0; cursor: pointer; padding: 6px 8px; color: inherit; opacity: .6;
+    }
+    .reveal-btn:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -981,6 +990,24 @@ $('#reclassify').addEventListener('click', async () => {
   dlg.close();
   render();
   classifyPending();
+});
+
+// Botão mostrar/esconder nos campos de chaves.
+document.querySelectorAll('input[type="password"]').forEach(input => {
+  const wrap = document.createElement('div');
+  wrap.className = 'reveal-wrap';
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'reveal-btn';
+  btn.textContent = 'mostrar';
+  btn.addEventListener('click', () => {
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'esconder' : 'mostrar';
+  });
+  wrap.appendChild(btn);
 });
 
 // ---------- arranque ----------
