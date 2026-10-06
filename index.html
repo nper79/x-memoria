@@ -129,12 +129,17 @@
     <input id="supabaseUrl" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off">
     <label for="supabaseKey">Chave anon do Supabase</label>
     <input id="supabaseKey" type="password" autocomplete="off">
-    <label for="apiKey">Chave da API da Anthropic</label>
-    <input id="apiKey" type="password" placeholder="sk-ant-…" autocomplete="off">
+    <label for="provider">Fornecedor da IA</label>
+    <select id="provider">
+      <option value="openrouter">OpenRouter</option>
+      <option value="anthropic">Anthropic (direto)</option>
+    </select>
+    <label for="apiKey">Chave da API</label>
+    <input id="apiKey" type="password" placeholder="sk-or-… (OpenRouter) ou sk-ant-… (Anthropic)" autocomplete="off">
     <label for="model">Modelo</label>
     <select id="model">
-      <option value="claude-opus-5-5">Claude Opus 5.5 — melhor qualidade</option>
-      <option value="claude-sonnet-5-5">Claude Sonnet 5.5 — mais rápido e barato</option>
+      <option value="opus">Claude Opus 5.5 — melhor qualidade</option>
+      <option value="sonnet">Claude Sonnet 5.5 — mais rápido e barato</option>
     </select>
     <p id="settings-status" class="hint"></p>
     <div class="row">
@@ -146,7 +151,11 @@
 
 <script>
 const $ = s => document.querySelector(s);
-const CFG_KEYS = ['supabaseUrl', 'supabaseKey', 'apiKey', 'model'];
+const CFG_KEYS = ['supabaseUrl', 'supabaseKey', 'provider', 'apiKey', 'model'];
+const MODELS = {
+  anthropic: { opus: 'claude-opus-5-5', sonnet: 'claude-sonnet-5-5' },
+  openrouter: { opus: 'anthropic/claude-opus-5.5', sonnet: 'anthropic/claude-sonnet-5.5' }
+};
 const BATCH = 15;
 
 const state = {
@@ -163,7 +172,9 @@ function cfg() {
   const c = {};
   for (const k of CFG_KEYS) { try { c[k] = localStorage.getItem('xmem_' + k) || ''; } catch { c[k] = ''; } }
   c.supabaseUrl = c.supabaseUrl.replace(/\/+$/, '');
-  c.model ||= 'claude-opus-5-5';
+  c.provider ||= c.apiKey.startsWith('sk-ant-') ? 'anthropic' : 'openrouter';
+  c.model = c.model.includes('sonnet') ? 'sonnet' : 'opus';
+  c.modelId = MODELS[c.provider][c.model];
   return c;
 }
 const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -208,7 +219,7 @@ async function updateArticle(id, fields) {
 // ---------- Claude (streaming, acumula blocos de conteúdo) ----------
 async function claude(body, onText) {
   const c = cfg();
-  if (!c.apiKey) throw new Error('Falta a chave da API da Anthropic (⚙️).');
+  if (!c.apiKey) throw new Error('Falta a chave da API (⚙️).');
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -218,7 +229,7 @@ async function claude(body, onText) {
       'anthropic-dangerous-direct-browser-access': 'true',
       'anthropic-beta': 'server-side-fallback-2026-07-01'
     },
-    body: JSON.stringify({ model: c.model, stream: true, fallbacks: 'default', ...body })
+    body: JSON.stringify({ model: c.modelId, stream: true, fallbacks: 'default', ...body })
   });
   if (!res.ok) {
     let detail = await res.text();
@@ -267,6 +278,20 @@ async function claude(body, onText) {
   return { content: blocks.filter(Boolean), stopReason };
 }
 
+// ---------- OpenRouter (API compatível com OpenAI; sem streaming para preservar o raciocínio) ----------
+async function openrouter(body) {
+  const c = cfg();
+  if (!c.apiKey) throw new Error('Falta a chave da API do OpenRouter (⚙️).');
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${c.apiKey}`, 'X-Title': 'X Memoria' },
+    body: JSON.stringify({ model: c.modelId, ...body })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) throw new Error(`Erro do OpenRouter (${res.status}): ${data.error?.message || res.statusText}`);
+  return data.choices[0];
+}
+
 // ---------- organização por tópico ----------
 const CLASSIFY_PROMPT = `Organizas a biblioteca pessoal de leitura de uma pessoa (posts e artigos guardados do X/Twitter).
 
@@ -310,18 +335,28 @@ async function classifyPending() {
       setBanner(`A organizar por tópico… ${done}/${pending.length}`);
       const batch = pending.slice(i, i + BATCH);
       const existing = [...topicCounts().keys()];
-      const res = await claude({
-        max_tokens: 16000,
-        output_config: { effort: 'low', format: { type: 'json_schema', schema: CLASSIFY_SCHEMA } },
-        system: CLASSIFY_PROMPT,
-        messages: [{
-          role: 'user',
-          content: `Tópicos que já existem: ${existing.join(', ') || '(nenhum ainda)'}\n\n` +
-            batch.map(a => `<artigo id="${a.id}" autor="${escapeHtml(a.author)}">\n${a.text.slice(0, 6000)}\n</artigo>`).join('\n\n')
-        }]
-      });
-      if (res.stopReason === 'refusal' || res.stopReason === 'max_tokens') { done += batch.length; continue; }
-      const text = res.content.filter(b => b.type === 'text').map(b => b.text).join('');
+      const userText = `Tópicos que já existem: ${existing.join(', ') || '(nenhum ainda)'}\n\n` +
+        batch.map(a => `<artigo id="${a.id}" autor="${escapeHtml(a.author)}">\n${a.text.slice(0, 6000)}\n</artigo>`).join('\n\n');
+      let text;
+      if (cfg().provider === 'openrouter') {
+        const choice = await openrouter({
+          max_tokens: 16000,
+          reasoning: { effort: 'low' },
+          response_format: { type: 'json_schema', json_schema: { name: 'organizacao', strict: true, schema: CLASSIFY_SCHEMA } },
+          messages: [{ role: 'system', content: CLASSIFY_PROMPT }, { role: 'user', content: userText }]
+        });
+        if (choice.finish_reason === 'length' || !choice.message?.content) { done += batch.length; continue; }
+        text = choice.message.content;
+      } else {
+        const res = await claude({
+          max_tokens: 16000,
+          output_config: { effort: 'low', format: { type: 'json_schema', schema: CLASSIFY_SCHEMA } },
+          system: CLASSIFY_PROMPT,
+          messages: [{ role: 'user', content: userText }]
+        });
+        if (res.stopReason === 'refusal' || res.stopReason === 'max_tokens') { done += batch.length; continue; }
+        text = res.content.filter(b => b.type === 'text').map(b => b.text).join('');
+      }
       const { items } = JSON.parse(text);
       for (const it of items) {
         if (!batch.some(a => a.id === it.id)) continue;
@@ -486,6 +521,54 @@ function addMessage(role, text) {
 
 async function ask(question) {
   if (!state.chatIndex) state.chatIndex = buildIndex(); // fixo durante a conversa
+  return cfg().provider === 'openrouter' ? askOpenRouter(question) : askAnthropic(question);
+}
+
+async function askOpenRouter(question) {
+  const tools = TOOLS.map(t => ({
+    type: 'function',
+    function: { name: t.name, description: t.description, parameters: t.input_schema, strict: true }
+  }));
+  const system = {
+    role: 'system',
+    content: [
+      { type: 'text', text: CHAT_PROMPT },
+      { type: 'text', text: `<indice total="${state.chatIndex.items.length}">\n${state.chatIndex.text || '(vazio)'}\n</indice>`, cache_control: { type: 'ephemeral' } }
+    ]
+  };
+  state.history.push({ role: 'user', content: question });
+  addMessage('user', question);
+
+  for (let round = 0; round < 10; round++) {
+    const wait = addMessage('activity', 'A pensar…');
+    let choice;
+    try {
+      choice = await openrouter({ max_tokens: 32000, reasoning: { effort: 'medium' }, tools, messages: [system, ...state.history] });
+    } finally {
+      wait.remove();
+    }
+    const msg = choice.message || {};
+    const turn = { role: 'assistant', content: msg.content || '' };
+    if (msg.tool_calls?.length) turn.tool_calls = msg.tool_calls;
+    if (msg.reasoning_details) turn.reasoning_details = msg.reasoning_details; // necessário para continuar depois das ferramentas
+    state.history.push(turn);
+    if (msg.content) addMessage('assistant', msg.content);
+    if (!msg.tool_calls?.length) {
+      if (!msg.content) addMessage('assistant', '(sem resposta)');
+      return;
+    }
+    for (const tc of msg.tool_calls) {
+      let input = null;
+      try { input = JSON.parse(tc.function.arguments || '{}'); } catch {}
+      const r = input ? runTool({ name: tc.function.name, input }) : { error: 'Argumentos inválidos (JSON).' };
+      if (r.label) addMessage('activity', r.label);
+      state.history.push({ role: 'tool', tool_call_id: tc.id, content: r.error ? 'Erro: ' + r.error : r.text });
+    }
+  }
+  addMessage('activity', '(parei: demasiados passos seguidos)');
+}
+
+async function askAnthropic(question) {
   const system = [
     { type: 'text', text: CHAT_PROMPT },
     { type: 'text', text: `<indice total="${state.chatIndex.items.length}">\n${state.chatIndex.text || '(vazio)'}\n</indice>` }
@@ -559,7 +642,9 @@ function openSettings() {
 $('#open-settings').addEventListener('click', openSettings);
 $('#close-settings').addEventListener('click', () => dlg.close());
 $('#save-settings').addEventListener('click', async () => {
+  const before = cfg().provider;
   for (const k of CFG_KEYS) { try { localStorage.setItem('xmem_' + k, $('#' + k).value.trim()); } catch {} }
+  if (cfg().provider !== before) $('#new-chat').click();
   $('#settings-status').textContent = 'A ligar…';
   try {
     await loadArticles();
