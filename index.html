@@ -3,149 +3,308 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#1d9bf0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="robots" content="noindex">
   <title>X Memória</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #ffffff; --bg-soft: #f7f9f9; --fg: #0f1419; --muted: #536471; --border: #e6ecf0;
-      --accent: #1d9bf0; --accent-soft: rgba(29,155,240,.12); --danger: #e0245e;
+      --paper: #f3eee4;
+      --card: #fbf8f1;
+      --ink: #1c1a16;
+      --ink-soft: #3d3930;
+      --muted: #7a7264;
+      --rule: #d8cfbf;
+      --accent: #c2410c;
+      --accent-soft: rgba(194, 65, 12, .09);
+      --shadow: 0 1px 0 rgba(28,26,22,.04), 0 12px 30px -18px rgba(28,26,22,.35);
+      --serif: "Instrument Serif", "Times New Roman", serif;
+      --text: "Newsreader", Georgia, serif;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+      color-scheme: light;
     }
     @media (prefers-color-scheme: dark) {
-      :root { --bg: #000; --bg-soft: #16181c; --fg: #e7e9ea; --muted: #71767b; --border: #2f3336; }
+      :root {
+        --paper: #13110e;
+        --card: #1b1915;
+        --ink: #eee7da;
+        --ink-soft: #cdc5b6;
+        --muted: #8d8576;
+        --rule: #2f2b24;
+        --accent: #f0743b;
+        --accent-soft: rgba(240, 116, 59, .12);
+        --shadow: 0 1px 0 rgba(0,0,0,.3), 0 16px 34px -20px rgba(0,0,0,.9);
+        color-scheme: dark;
+      }
     }
+
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
+    html, body { margin: 0; min-height: 100%; }
     body {
-      background: var(--bg); color: var(--fg);
-      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-      display: flex; flex-direction: column;
-      padding-bottom: env(safe-area-inset-bottom);
+      background: var(--paper);
+      color: var(--ink);
+      font: 17px/1.55 var(--text);
+      -webkit-font-smoothing: antialiased;
     }
-    button { font: inherit; cursor: pointer; border: none; border-radius: 999px; padding: 8px 16px; background: var(--accent); color: #fff; font-weight: 600; }
-    button:disabled { opacity: .5; cursor: default; }
-    button.ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
-    button.link { background: none; color: var(--muted); padding: 0; font-weight: 400; font-size: 14px; }
-    input, select, textarea { width: 100%; font: inherit; color: var(--fg); background: transparent; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
-    a { color: var(--accent); }
-    .hint { color: var(--muted); font-size: 13px; }
+    /* grão de papel */
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .35;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 0 0.33 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
+    input, select, textarea {
+      font: inherit; color: var(--ink); background: var(--card);
+      border: 1px solid var(--rule); border-radius: 2px; padding: 10px 12px; width: 100%;
+    }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+    .mono { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
     .hidden { display: none !important; }
 
-    header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
-    header h1 { font-size: 18px; margin: 0; flex: 1; }
-    #banner { font-size: 13px; color: var(--accent); }
-
-    .layout { flex: 1; min-height: 0; display: flex; }
-    .pane { flex: 1; min-width: 0; min-height: 0; display: none; flex-direction: column; }
-    .pane.active { display: flex; }
-    nav.bottom { display: flex; border-top: 1px solid var(--border); }
-    nav.bottom button { flex: 1; background: none; color: var(--muted); border-radius: 0; padding: 12px; }
-    nav.bottom button.active { color: var(--accent); }
-    @media (min-width: 900px) {
-      .pane { display: flex; }
-      #chat { flex: 0 0 440px; border-left: 1px solid var(--border); }
-      nav.bottom { display: none; }
+    .btn {
+      font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+      border: 1px solid var(--ink); padding: 9px 14px; border-radius: 2px; transition: background .15s, color .15s;
     }
+    .btn:hover { background: var(--ink); color: var(--paper); }
+    .btn.solid { background: var(--ink); color: var(--paper); }
+    .btn.solid:hover { background: var(--accent); border-color: var(--accent); }
+    .btn.danger { border-color: transparent; color: var(--muted); }
+    .btn.danger:hover { background: none; color: #b42318; }
 
-    /* biblioteca */
-    .toolbar { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
-    #topics { display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip { background: var(--bg-soft); color: var(--fg); border: 1px solid var(--border); padding: 4px 12px; font-weight: 500; font-size: 14px; }
-    .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .chip .n { opacity: .6; margin-left: 4px; }
-    #list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
-    #list li { padding: 14px 16px; border-bottom: 1px solid var(--border); }
-    .meta { color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; gap: 8px; }
-    .title { font-weight: 700; margin: 4px 0 2px; cursor: pointer; }
-    .summary { color: var(--muted); font-size: 15px; cursor: pointer; }
-    .full { white-space: pre-wrap; word-wrap: break-word; margin-top: 8px; padding: 10px 12px; background: var(--bg-soft); border-radius: 10px; font-size: 15px; }
-    .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-    .tag { font-size: 12px; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 8px; cursor: pointer; }
-    .actions { margin-top: 6px; display: flex; gap: 14px; font-size: 14px; align-items: center; }
+    /* ---------- estrutura ---------- */
+    .app { position: relative; z-index: 1; display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+    aside.side {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      border-right: 1px solid var(--rule); padding: 28px 24px 24px; display: flex; flex-direction: column; gap: 22px;
+    }
+    .masthead h1 {
+      font-family: var(--serif); font-weight: 400; font-size: 54px; line-height: .9; margin: 0; letter-spacing: -.01em;
+    }
+    .masthead h1 em { color: var(--accent); }
+    .masthead .sub { margin-top: 10px; color: var(--muted); }
+    #banner { color: var(--accent); min-height: 1em; }
+    #banner:not(:empty)::before { content: "● "; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 50% { opacity: .2; } }
 
-    /* chat */
-    #messages { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
-    .msg { padding: 8px 12px; border-radius: 16px; max-width: 92%; white-space: pre-wrap; word-wrap: break-word; }
-    .msg.user { align-self: flex-end; background: var(--accent); color: #fff; }
-    .msg.assistant { align-self: flex-start; background: var(--bg-soft); }
-    .msg.activity { align-self: flex-start; background: none; color: var(--muted); font-size: 13px; padding: 0 4px; }
-    .msg.error { align-self: stretch; color: var(--danger); border: 1px solid var(--danger); }
-    .empty { color: var(--muted); text-align: center; margin: auto; padding: 24px; }
-    #composer { display: flex; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--border); align-items: flex-end; }
-    #composer textarea { resize: none; max-height: 160px; }
-    .chat-head { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--border); }
+    .toc h2 { margin: 0 0 8px; color: var(--muted); font-weight: 400; }
+    .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: t; }
+    .toc li button {
+      width: 100%; display: flex; align-items: baseline; gap: 8px; padding: 5px 0; text-align: left;
+      font-size: 17px; color: var(--ink-soft);
+    }
+    .toc li button .num { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 20px; flex: none; }
+    .toc li button .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toc li button .dots { flex: 1; border-bottom: 1px dotted var(--rule); transform: translateY(-4px); min-width: 12px; }
+    .toc li button .n { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+    .toc li button:hover .name { color: var(--accent); }
+    .toc li button.active .name { color: var(--accent); font-style: italic; }
+    .toc li button.active .num { color: var(--accent); }
+    .side-foot { margin-top: auto; display: flex; gap: 14px; color: var(--muted); }
+    .side-foot button:hover { color: var(--accent); }
 
-    /* definições */
-    dialog { border: 1px solid var(--border); border-radius: 16px; background: var(--bg); color: var(--fg); width: min(520px, calc(100vw - 32px)); padding: 20px; }
-    dialog::backdrop { background: rgba(0,0,0,.5); }
-    dialog label { font-weight: 600; margin: 12px 0 4px; display: block; }
-    dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+    main.feed { padding: 28px clamp(16px, 4vw, 56px) 120px; min-width: 0; }
+    .feed-head { display: flex; flex-wrap: wrap; align-items: end; gap: 16px 24px; border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 26px; }
+    .feed-head h2 { font-family: var(--serif); font-weight: 400; font-size: 40px; line-height: 1; margin: 0; flex: 1; min-width: 220px; }
+    .feed-head h2 em { color: var(--accent); }
+    .feed-head h2 small { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .06em; margin-left: 8px; vertical-align: middle; }
+    .search { position: relative; width: min(320px, 100%); }
+    .search input { padding-left: 34px; background: transparent; border-width: 0 0 1px; border-radius: 0; }
+    .search::before { content: "⌕"; position: absolute; left: 8px; top: 7px; font-size: 20px; color: var(--muted); }
+    .views { display: flex; border: 1px solid var(--rule); }
+    .views button { padding: 7px 12px; color: var(--muted); }
+    .views button.active { background: var(--ink); color: var(--paper); }
+
+    /* ---------- cartões ---------- */
+    .grid { columns: 300px; column-gap: 22px; }
+    .card {
+      break-inside: avoid; margin: 0 0 22px; background: var(--card); box-shadow: var(--shadow);
+      padding: 20px 20px 16px; position: relative; cursor: pointer;
+      border-top: 3px solid var(--ink); transition: transform .2s ease, border-color .2s;
+      animation: rise .5s both; animation-delay: calc(var(--i, 0) * 35ms);
+    }
+    .card:hover { transform: translateY(-3px) rotate(-.2deg); border-top-color: var(--accent); }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+    .card .tags { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--accent); margin-bottom: 10px; }
+    .card h3 { font-family: var(--serif); font-weight: 400; font-size: 27px; line-height: 1.08; margin: 0 0 10px; }
+    .card p { margin: 0; color: var(--ink-soft); font-size: 16px; }
+    .card .by { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 10px; color: var(--muted); }
+    .card .by span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card.untagged { border-top-style: dashed; }
+
+    .embed-slot { break-inside: avoid; margin: 0 0 22px; min-height: 120px; animation: rise .5s both; }
+    .embed-slot .fallback { background: var(--card); box-shadow: var(--shadow); padding: 18px; }
+    .embed-slot .loading { color: var(--muted); padding: 30px 0; text-align: center; }
+    .twitter-tweet { margin: 0 auto !important; }
+    .slot-head { width: 100%; display: flex; justify-content: space-between; gap: 10px; padding: 6px 2px 8px; color: var(--accent); border-top: 3px solid var(--ink); }
+    .slot-head span:last-child { color: var(--muted); }
+    .slot-head:hover span:last-child { color: var(--accent); }
+
+    .more { display: flex; justify-content: center; margin-top: 10px; }
+    .empty-state { text-align: center; padding: 80px 20px; color: var(--muted); }
+    .empty-state .big { font-family: var(--serif); font-size: 44px; color: var(--ink); line-height: 1.05; margin-bottom: 10px; }
+
+    /* ---------- painel de leitura ---------- */
+    .scrim { position: fixed; inset: 0; background: rgba(20,18,14,.45); z-index: 30; opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .scrim.on { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 40; width: min(620px, 100vw);
+      background: var(--paper); border-left: 1px solid var(--rule); box-shadow: -30px 0 60px -40px rgba(0,0,0,.5);
+      transform: translateX(102%); transition: transform .32s cubic-bezier(.2,.7,.2,1);
+      display: flex; flex-direction: column;
+    }
+    .drawer:not(.on) { box-shadow: none; visibility: hidden; transition: transform .32s cubic-bezier(.2,.7,.2,1), visibility 0s .32s; }
+    .drawer.on { transform: none; }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-bottom: 1px solid var(--rule); color: var(--muted); }
+    .drawer-head .x { font-size: 26px; line-height: 1; color: var(--ink); padding: 0 4px; }
+    .drawer-body { overflow-y: auto; padding: 26px 30px 40px; flex: 1; }
+    .reader .tags { color: var(--accent); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+    .reader h2 { font-family: var(--serif); font-weight: 400; font-size: 44px; line-height: 1.02; margin: 12px 0 12px; }
+    .reader .meta { color: var(--muted); margin-bottom: 18px; }
+    .reader .standfirst { font-style: italic; font-size: 20px; color: var(--ink-soft); border-left: 3px solid var(--accent); padding-left: 14px; margin: 0 0 24px; }
+    .reader .embed { min-height: 80px; margin: 0 0 18px; }
+    .reader details { border-top: 1px solid var(--rule); padding-top: 12px; }
+    .reader summary { cursor: pointer; color: var(--muted); list-style: none; }
+    .reader summary::before { content: "＋ "; }
+    .reader details[open] summary::before { content: "－ "; }
+    .reader .saved-text { white-space: pre-wrap; font-size: 17px; margin-top: 12px; }
+    .reader .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; padding-top: 18px; border-top: 2px solid var(--ink); }
+
+    /* ---------- chat ---------- */
+    .chat-fab {
+      position: fixed; right: 22px; bottom: 22px; z-index: 20;
+      background: var(--ink); color: var(--paper); border-radius: 999px; padding: 14px 20px 14px 18px;
+      display: flex; align-items: center; gap: 10px; box-shadow: 0 14px 30px -12px rgba(0,0,0,.6);
+      font-family: var(--serif); font-size: 21px; font-style: italic; transition: transform .2s, background .2s;
+    }
+    .chat-fab:hover { transform: translateY(-2px); background: var(--accent); }
+    .chat-fab .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+    .chat-fab:hover .dot { background: var(--paper); }
+    .chat .drawer-body { display: flex; flex-direction: column; gap: 16px; padding: 22px 26px; }
+    .chat-intro { margin: auto 0; text-align: left; }
+    .chat-intro .big { font-family: var(--serif); font-size: 40px; line-height: 1.02; margin-bottom: 14px; }
+    .chat-intro .big em { color: var(--accent); }
+    .suggest { display: flex; flex-direction: column; gap: 8px; }
+    .suggest button { text-align: left; border: 1px solid var(--rule); padding: 10px 12px; font-style: italic; color: var(--ink-soft); background: var(--card); }
+    .suggest button:hover { border-color: var(--accent); color: var(--accent); }
+    .msg { white-space: pre-wrap; word-wrap: break-word; max-width: 100%; }
+    .msg.user { align-self: flex-end; background: var(--ink); color: var(--paper); padding: 10px 14px; max-width: 85%; border-radius: 2px; }
+    .msg.assistant { font-size: 17.5px; border-left: 2px solid var(--accent); padding-left: 14px; }
+    .msg.assistant b { font-weight: 600; }
+    .msg.activity { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; color: var(--muted); }
+    .msg.error { color: #b42318; border: 1px solid currentColor; padding: 10px 12px; }
+    .composer { border-top: 1px solid var(--rule); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: flex-end; }
+    .composer textarea { resize: none; max-height: 160px; background: var(--card); }
+
+    /* ---------- definições ---------- */
+    dialog { border: 1px solid var(--rule); background: var(--paper); color: var(--ink); width: min(520px, calc(100vw - 32px)); padding: 26px; box-shadow: var(--shadow); }
+    dialog::backdrop { background: rgba(20,18,14,.5); }
+    dialog h2 { font-family: var(--serif); font-weight: 400; font-size: 34px; margin: 0 0 4px; }
+    dialog label { display: block; margin: 14px 0 6px; color: var(--muted); }
+    dialog .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 22px; }
+    .hint { color: var(--muted); font-size: 14px; }
+
+    /* ---------- telemóvel ---------- */
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      aside.side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule); padding: 20px 16px 12px; gap: 14px; }
+      .masthead { display: flex; align-items: end; justify-content: space-between; gap: 10px; }
+      .masthead h1 { font-size: 40px; }
+      .masthead .sub { margin: 0; text-align: right; }
+      .toc h2 { display: none; }
+      .toc ol { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+      .toc li button { border: 1px solid var(--rule); padding: 5px 12px; white-space: nowrap; font-size: 15px; background: var(--card); }
+      .toc li button.active { border-color: var(--accent); }
+      .toc li button .num, .toc li button .dots { display: none; }
+      .side-foot { position: absolute; top: 22px; right: 16px; }
+      .masthead .sub { display: none; }
+      main.feed { padding: 18px 16px 110px; }
+      .feed-head h2 { font-size: 32px; }
+      .grid { columns: 1; }
+      .drawer-body { padding: 20px 18px 40px; }
+      .reader h2 { font-size: 36px; }
+      .chat-fab { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>🔖 X Memória</h1>
-    <span id="banner"></span>
-    <button class="link" id="open-settings" title="Definições">⚙️</button>
-  </header>
-
-  <div class="layout">
-    <section id="library" class="pane active">
-      <div class="toolbar">
-        <input id="search" type="search" placeholder="Procurar nos teus guardados…">
-        <div id="topics"></div>
+  <div class="app">
+    <aside class="side">
+      <div class="masthead">
+        <h1>X <em>Memória</em></h1>
+        <div class="sub mono" id="tally"></div>
       </div>
-      <ul id="list"></ul>
-    </section>
-
-    <section id="chat" class="pane">
-      <div class="chat-head">
-        <b>Conversar</b>
-        <button class="link" id="new-chat">Nova conversa</button>
+      <div id="banner" class="mono"></div>
+      <nav class="toc">
+        <h2 class="mono">Índice</h2>
+        <ol id="topics"></ol>
+      </nav>
+      <div class="side-foot mono">
+        <button id="open-settings">Definições</button>
+        <button id="refresh">Atualizar</button>
       </div>
-      <div id="messages">
-        <div class="empty">
-          <p>Pergunta sobre os teus artigos.</p>
-          <p class="hint">“Vê os artigos de marketing — há algum de jeito? Qual achas melhor?”<br>“O que guardei esta semana sobre IA?”<br>“Que ideias se repetem nos posts de startups?”</p>
+    </aside>
+
+    <main class="feed">
+      <div class="feed-head">
+        <h2 id="feed-title">Todos os recortes</h2>
+        <div class="search"><input id="search" type="search" placeholder="Procurar…" aria-label="Procurar"></div>
+        <div class="views mono" role="tablist">
+          <button data-view="cards" class="active">Resumos</button>
+          <button data-view="embeds">Originais</button>
         </div>
       </div>
-      <form id="composer">
-        <textarea id="input" rows="1" placeholder="Pergunta…"></textarea>
-        <button type="submit" id="send">↑</button>
-      </form>
-    </section>
+      <div id="grid" class="grid"></div>
+      <div class="more"><button id="more" class="btn hidden">Mostrar mais</button></div>
+    </main>
   </div>
 
-  <nav class="bottom">
-    <button data-pane="library" class="active">📚 Artigos</button>
-    <button data-pane="chat">💬 Chat</button>
-  </nav>
+  <button class="chat-fab" id="open-chat"><span class="dot"></span>Perguntar à memória</button>
+
+  <div class="scrim" id="scrim"></div>
+
+  <section class="drawer reader-drawer" id="reader" aria-label="Artigo">
+    <div class="drawer-head"><span class="mono">Recorte</span><button class="x" data-close>×</button></div>
+    <div class="drawer-body reader" id="reader-body"></div>
+  </section>
+
+  <section class="drawer chat" id="chat" aria-label="Conversa">
+    <div class="drawer-head">
+      <span class="mono">Conversa</span>
+      <span><button class="mono" id="new-chat" style="margin-right:16px">Nova</button><button class="x" data-close>×</button></span>
+    </div>
+    <div class="drawer-body" id="messages"></div>
+    <form class="composer" id="composer">
+      <textarea id="input" rows="1" placeholder="Pergunta à tua memória…"></textarea>
+      <button type="submit" id="send" class="btn solid">Enviar</button>
+    </form>
+  </section>
 
   <dialog id="settings">
-    <h2 style="margin-top:0">Definições</h2>
+    <h2>Definições</h2>
     <p class="hint">Ficam guardadas só neste browser. Usa os mesmos valores da extensão do Chrome.</p>
-    <label for="supabaseUrl">URL do Supabase</label>
+    <label class="mono" for="supabaseUrl">URL do Supabase</label>
     <input id="supabaseUrl" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off">
-    <label for="supabaseKey">Chave anon do Supabase</label>
+    <label class="mono" for="supabaseKey">Chave do Supabase (publishable / anon)</label>
     <input id="supabaseKey" type="password" autocomplete="off">
-    <label for="provider">Fornecedor da IA</label>
+    <label class="mono" for="provider">Fornecedor da IA</label>
     <select id="provider">
       <option value="openrouter">OpenRouter</option>
       <option value="anthropic">Anthropic (direto)</option>
     </select>
-    <label for="apiKey">Chave da API</label>
+    <label class="mono" for="apiKey">Chave da API</label>
     <input id="apiKey" type="password" placeholder="sk-or-… (OpenRouter) ou sk-ant-… (Anthropic)" autocomplete="off">
-    <label for="model">Modelo</label>
+    <label class="mono" for="model">Modelo</label>
     <select id="model">
       <option value="opus">Claude Opus 5.5 — melhor qualidade</option>
       <option value="sonnet">Claude Sonnet 5.5 — mais rápido e barato</option>
     </select>
     <p id="settings-status" class="hint"></p>
     <div class="row">
-      <button class="ghost" id="reclassify" type="button">Reorganizar todos os tópicos</button>
-      <button class="ghost" id="close-settings" type="button">Fechar</button>
-      <button id="save-settings" type="button">Guardar</button>
+      <button class="btn danger" id="reclassify" type="button">Reorganizar tópicos</button>
+      <button class="btn" id="close-settings" type="button">Fechar</button>
+      <button class="btn solid" id="save-settings" type="button">Guardar</button>
     </div>
   </dialog>
 
@@ -157,10 +316,13 @@ const MODELS = {
   openrouter: { opus: 'anthropic/claude-opus-5.5', sonnet: 'anthropic/claude-sonnet-5.5' }
 };
 const BATCH = 15;
+const PAGE_SIZE = 60;
 
 const state = {
   articles: [],
-  topic: null,
+  topic: null,     // null = todos, '' = por organizar
+  view: 'cards',
+  limit: PAGE_SIZE,
   history: [],     // mensagens da conversa (append-only)
   chatIndex: null, // snapshot dos artigos no início da conversa
   busy: false,
@@ -179,13 +341,16 @@ function cfg() {
 }
 const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const renderMarkdown = t => escapeHtml(t)
-  .replace(/^### (.+)$/gm, '<b>$1</b>')
-  .replace(/^## (.+)$/gm, '<b>$1</b>')
+  .replace(/^#{1,4} (.+)$/gm, '<b>$1</b>')
   .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
   .replace(/(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('pt-PT', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 const topicsOf = a => Array.isArray(a.topics) ? a.topics : [];
 const setBanner = t => { $('#banner').textContent = t || ''; };
+const handle = a => (a.author || '').match(/@\w+/)?.[0] || a.author || a.source || '';
+const authorName = a => (a.author || '').replace(/@\w+.*$/, '').replace(/·.*$/, '').trim() || handle(a);
+const tweetId = url => url?.match(/status\/(\d+)/)?.[1] || null;
+const isDark = () => matchMedia('(prefers-color-scheme: dark)').matches;
 
 // ---------- Supabase ----------
 async function sb(path, opts = {}) {
@@ -374,6 +539,31 @@ async function classifyPending() {
   setBanner('');
 }
 
+
+// ---------- embeds do X ----------
+let twttrPromise = null;
+function loadTwitter() {
+  twttrPromise ||= new Promise(resolve => {
+    const s = document.createElement('script');
+    s.src = 'https://platform.twitter.com/widgets.js';
+    s.async = true;
+    s.onload = () => window.twttr?.ready ? twttr.ready(() => resolve(window.twttr)) : resolve(null);
+    s.onerror = () => resolve(null);
+    document.head.appendChild(s);
+  });
+  return twttrPromise;
+}
+async function embedTweet(url, el) {
+  const id = tweetId(url);
+  if (!id) return false;
+  const tw = await loadTwitter();
+  if (!tw) return false;
+  try {
+    const node = await tw.widgets.createTweet(id, el, { theme: isDark() ? 'dark' : 'light', dnt: true, conversation: 'none', align: 'center' });
+    return Boolean(node);
+  } catch { return false; }
+}
+
 // ---------- biblioteca ----------
 function topicCounts() {
   const m = new Map();
@@ -381,66 +571,174 @@ function topicCounts() {
   return new Map([...m].sort((a, b) => b[1] - a[1]));
 }
 
+function filtered() {
+  const q = $('#search').value.trim().toLowerCase();
+  let list = state.articles;
+  if (state.topic === '') list = list.filter(a => !topicsOf(a).length);
+  else if (state.topic) list = list.filter(a => topicsOf(a).includes(state.topic));
+  if (q) list = list.filter(a => `${a.title} ${a.author} ${a.summary} ${a.text}`.toLowerCase().includes(q));
+  return list;
+}
+
 function render() {
   const counts = topicCounts();
   const unsorted = state.articles.filter(a => !topicsOf(a).length).length;
-  const chips = [`<button class="chip ${state.topic === null ? 'active' : ''}" data-t="">Todos<span class="n">${state.articles.length}</span></button>`];
-  for (const [t, n] of counts) chips.push(`<button class="chip ${state.topic === t ? 'active' : ''}" data-t="${escapeHtml(t)}">${escapeHtml(t)}<span class="n">${n}</span></button>`);
-  if (unsorted) chips.push(`<button class="chip ${state.topic === '' ? 'active' : ''}" data-t="__none">Por organizar<span class="n">${unsorted}</span></button>`);
-  $('#topics').innerHTML = chips.join('');
-  $('#topics').querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
-    const t = ch.dataset.t;
-    state.topic = t === '' ? null : t === '__none' ? '' : t;
+  $('#tally').textContent = `${state.articles.length} recortes · ${counts.size} tópicos`;
+
+  const item = (key, label, n, i) => `
+    <li><button data-t="${escapeHtml(key)}" class="${(key === '__all' ? state.topic === null : key === '__none' ? state.topic === '' : state.topic === key) ? 'active' : ''}">
+      <span class="num">${i}</span><span class="name">${escapeHtml(label)}</span><span class="dots"></span><span class="n">${n}</span>
+    </button></li>`;
+  let html = item('__all', 'Todos', state.articles.length, '—');
+  let i = 1;
+  for (const [t, n] of counts) html += item(t, t, n, String(i++).padStart(2, '0'));
+  if (unsorted) html += item('__none', 'Por organizar', unsorted, '··');
+  $('#topics').innerHTML = html;
+  $('#topics').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const t = b.dataset.t;
+    state.topic = t === '__all' ? null : t === '__none' ? '' : t;
+    state.limit = PAGE_SIZE;
     render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }));
-  renderList();
+
+  $('#feed-title').innerHTML = (state.topic === null ? 'Todos os <em>recortes</em>' : state.topic === '' ? 'Por <em>organizar</em>' : `<em>${escapeHtml(state.topic)}</em>`) +
+    `<small>${filtered().length}</small>`;
+  renderGrid();
 }
 
-function renderList() {
-  const q = $('#search').value.trim().toLowerCase();
-  let shown = state.articles;
-  if (state.topic === '') shown = shown.filter(a => !topicsOf(a).length);
-  else if (state.topic) shown = shown.filter(a => topicsOf(a).includes(state.topic));
-  if (q) shown = shown.filter(a => `${a.title} ${a.author} ${a.summary} ${a.text}`.toLowerCase().includes(q));
+let embedObserver = null;
+function renderGrid() {
+  const list = filtered();
+  const grid = $('#grid');
+  embedObserver?.disconnect();
+  grid.innerHTML = '';
 
-  const list = $('#list');
-  list.innerHTML = shown.length ? '' : `<li class="empty">${state.articles.length ? 'Nada encontrado.' : 'Ainda não há artigos. Importa os teus Guardados com a extensão do Chrome.'}</li>`;
-  for (const a of shown) {
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <div class="meta"><span>${escapeHtml(a.author || a.source)}</span><span>${fmtDate(a.posted_at || a.saved_at)}</span></div>
-      <div class="title">${escapeHtml(a.title || a.text.slice(0, 100))}</div>
-      ${a.summary ? `<div class="summary">${escapeHtml(a.summary)}</div>` : ''}
-      <div class="tags">${topicsOf(a).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
-      <div class="full hidden">${escapeHtml(a.text)}</div>
-      <div class="actions">
-        <button class="link toggle">Ler tudo</button>
-        <a href="${escapeHtml(a.url)}" target="_blank" rel="noopener">Abrir original ↗</a>
-        <button class="link edit">Editar tópicos</button>
-        <button class="link del">Apagar</button>
-      </div>`;
-    const full = li.querySelector('.full'), toggle = li.querySelector('.toggle');
-    const flip = () => { full.classList.toggle('hidden'); toggle.textContent = full.classList.contains('hidden') ? 'Ler tudo' : 'Fechar'; };
-    toggle.addEventListener('click', flip);
-    li.querySelector('.title').addEventListener('click', flip);
-    li.querySelector('.summary')?.addEventListener('click', flip);
-    li.querySelectorAll('.tag').forEach(tag => tag.addEventListener('click', () => { state.topic = tag.textContent; render(); }));
-    li.querySelector('.edit').addEventListener('click', async () => {
-      const v = prompt('Tópicos (separados por vírgulas):', topicsOf(a).join(', '));
-      if (v === null) return;
-      await updateArticle(a.id, { topics: v.split(',').map(s => s.trim()).filter(Boolean) });
-      render();
-    });
-    li.querySelector('.del').addEventListener('click', async () => {
-      if (!confirm('Apagar este artigo?')) return;
-      await sb(`articles?id=eq.${encodeURIComponent(a.id)}`, { method: 'DELETE' });
-      state.articles = state.articles.filter(x => x.id !== a.id);
-      render();
-    });
-    list.appendChild(li);
+  if (!list.length) {
+    grid.innerHTML = state.articles.length
+      ? `<div class="empty-state"><div class="big">Nada por aqui.</div>Experimenta outra pesquisa ou outro tópico.</div>`
+      : `<div class="empty-state"><div class="big">A tua memória está vazia.</div>Importa os teus Guardados do X com a extensão do Chrome — aparecem aqui sozinhos.</div>`;
+    $('#more').classList.add('hidden');
+    return;
   }
+
+  const shown = list.slice(0, state.limit);
+  if (state.view === 'embeds') {
+    embedObserver = new IntersectionObserver(entries => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        embedObserver.unobserve(e.target);
+        const a = state.articles.find(x => x.id === e.target.dataset.id);
+        const box = e.target.querySelector('.embed-box');
+        embedTweet(a.url, box).then(ok => {
+          box.querySelector('.loading')?.remove();
+          if (!ok) box.innerHTML = fallbackCard(a);
+        });
+      }
+    }, { rootMargin: '600px' });
+    shown.forEach((a, i) => {
+      const slot = document.createElement('div');
+      slot.className = 'embed-slot';
+      slot.dataset.id = a.id;
+      slot.style.setProperty('--i', Math.min(i, 12));
+      slot.innerHTML = `
+        <button class="slot-head mono"><span>${topicsOf(a).map(escapeHtml).join(' · ') || 'por organizar'}</span><span>abrir recorte →</span></button>
+        <div class="embed-box"><div class="loading mono">A carregar ${escapeHtml(handle(a))}…</div></div>`;
+      slot.querySelector('.slot-head').addEventListener('click', () => openReader(a));
+      grid.appendChild(slot);
+      embedObserver.observe(slot);
+    });
+  } else {
+    shown.forEach((a, i) => {
+      const card = document.createElement('article');
+      card.className = 'card' + (topicsOf(a).length ? '' : ' untagged');
+      card.style.setProperty('--i', Math.min(i, 16));
+      card.innerHTML = `
+        <div class="tags mono">${topicsOf(a).map(escapeHtml).join('<span>·</span>') || 'por organizar'}</div>
+        <h3>${escapeHtml(a.title || a.text.slice(0, 90))}</h3>
+        <p>${escapeHtml(a.summary || a.text.slice(0, 220) + (a.text.length > 220 ? '…' : ''))}</p>
+        <div class="by mono"><span>${escapeHtml(handle(a))}</span><span>${fmtDate(a.posted_at || a.saved_at)}</span></div>`;
+      card.addEventListener('click', () => openReader(a));
+      grid.appendChild(card);
+    });
+  }
+  $('#more').classList.toggle('hidden', list.length <= state.limit);
 }
-$('#search').addEventListener('input', renderList);
+
+function fallbackCard(a) {
+  return `<div class="fallback">
+    <div class="mono" style="color:var(--muted)">${escapeHtml(handle(a))} · post indisponível para embed</div>
+    <p style="white-space:pre-wrap;margin:10px 0 0">${escapeHtml(a.text.slice(0, 600))}</p>
+    <p class="mono" style="margin-top:10px"><a href="${escapeHtml(a.url)}" target="_blank" rel="noopener">Abrir no X ↗</a></p>
+  </div>`;
+}
+
+$('#search').addEventListener('input', () => { state.limit = PAGE_SIZE; render(); });
+$('#more').addEventListener('click', () => { state.limit += PAGE_SIZE; renderGrid(); });
+document.querySelectorAll('.views button').forEach(b => b.addEventListener('click', () => {
+  state.view = b.dataset.view;
+  document.querySelectorAll('.views button').forEach(x => x.classList.toggle('active', x === b));
+  try { localStorage.setItem('xmem_view', state.view); } catch {}
+  renderGrid();
+}));
+
+// ---------- painéis ----------
+function openDrawer(id) {
+  document.querySelectorAll('.drawer').forEach(d => d.classList.toggle('on', d.id === id));
+  $('#scrim').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawers() {
+  document.querySelectorAll('.drawer').forEach(d => d.classList.remove('on'));
+  $('#scrim').classList.remove('on');
+  document.body.style.overflow = '';
+}
+$('#scrim').addEventListener('click', closeDrawers);
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeDrawers));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#settings').open) closeDrawers(); });
+
+function openReader(a) {
+  const body = $('#reader-body');
+  body.innerHTML = `
+    <div class="tags mono">${topicsOf(a).map(escapeHtml).join('<span>·</span>') || 'por organizar'}</div>
+    <h2>${escapeHtml(a.title || a.text.slice(0, 90))}</h2>
+    <div class="meta mono">${escapeHtml(a.author || a.source)} · ${fmtDate(a.posted_at || a.saved_at)}</div>
+    ${a.summary ? `<p class="standfirst">${escapeHtml(a.summary)}</p>` : ''}
+    <div class="embed"><div class="mono" style="color:var(--muted)">A carregar o original…</div></div>
+    <details id="saved"><summary class="mono">Texto guardado</summary><div class="saved-text">${escapeHtml(a.text)}</div></details>
+    <div class="actions">
+      <button class="btn solid" data-act="ask">Perguntar sobre isto</button>
+      <a class="btn" href="${escapeHtml(a.url)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">Abrir no X ↗</a>
+      <button class="btn" data-act="topics">Editar tópicos</button>
+      <button class="btn danger" data-act="del">Apagar</button>
+    </div>`;
+  openDrawer('reader');
+  body.scrollTop = 0;
+
+  const slot = body.querySelector('.embed');
+  embedTweet(a.url, slot).then(ok => {
+    slot.querySelector('.mono')?.remove();
+    if (!ok) { slot.remove(); body.querySelector('#saved').open = true; }
+  });
+
+  body.querySelector('[data-act="ask"]').addEventListener('click', () => {
+    openChat(`Sobre o recorte “${a.title || a.text.slice(0, 60)}” de ${handle(a)}: `);
+  });
+  body.querySelector('[data-act="topics"]').addEventListener('click', async () => {
+    const v = prompt('Tópicos (separados por vírgulas):', topicsOf(a).join(', '));
+    if (v === null) return;
+    await updateArticle(a.id, { topics: v.split(',').map(s => s.trim()).filter(Boolean) });
+    render();
+    openReader(a);
+  });
+  body.querySelector('[data-act="del"]').addEventListener('click', async () => {
+    if (!confirm('Apagar este recorte da memória?')) return;
+    await sb(`articles?id=eq.${encodeURIComponent(a.id)}`, { method: 'DELETE' });
+    state.articles = state.articles.filter(x => x.id !== a.id);
+    closeDrawers();
+    render();
+  });
+}
 
 // ---------- chat com índice + ferramentas ----------
 const CHAT_PROMPT = `És o assistente de leitura pessoal do utilizador. Ele guarda posts e artigos do X (Twitter) e quer ajuda para tirar partido deles.
@@ -509,8 +807,32 @@ function runTool(block) {
   return { error: 'Ferramenta desconhecida.' };
 }
 
+
+// ---------- chat: interface ----------
+const SUGGESTIONS = [
+  'Vê os artigos de marketing — há algum de jeito? Qual achas melhor e porquê?',
+  'O que guardei nas últimas duas semanas? Faz-me um resumo por tema.',
+  'Que ideias se repetem em vários recortes?'
+];
+function chatIntro() {
+  $('#messages').innerHTML = `
+    <div class="chat-intro">
+      <div class="big">Pergunta à tua <em>memória</em>.</div>
+      <p class="hint">O Claude vê o índice de tudo o que guardaste e lê os recortes completos quando precisa.</p>
+      <div class="suggest">${SUGGESTIONS.map(s => `<button type="button">${escapeHtml(s)}</button>`).join('')}</div>
+    </div>`;
+  $('#messages').querySelectorAll('.suggest button').forEach(b => b.addEventListener('click', () => {
+    $('#input').value = b.textContent;
+    $('#composer').requestSubmit();
+  }));
+}
+function openChat(prefill) {
+  openDrawer('chat');
+  if (prefill) { $('#input').value = prefill; }
+  setTimeout(() => { const i = $('#input'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 320);
+}
 function addMessage(role, text) {
-  $('#messages .empty')?.remove();
+  $('#messages .chat-intro')?.remove();
   const el = document.createElement('div');
   el.className = `msg ${role}`;
   el.innerHTML = renderMarkdown(text);
@@ -608,6 +930,7 @@ async function askAnthropic(question) {
   addMessage('activity', '(parei: demasiados passos seguidos)');
 }
 
+
 $('#composer').addEventListener('submit', async e => {
   e.preventDefault();
   const q = $('#input').value.trim();
@@ -617,19 +940,11 @@ $('#composer').addEventListener('submit', async e => {
   finally { state.busy = false; $('#send').disabled = false; }
 });
 $('#input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey && window.matchMedia('(min-width: 900px)').matches) { e.preventDefault(); $('#composer').requestSubmit(); }
+  if (e.key === 'Enter' && !e.shiftKey && matchMedia('(min-width: 861px)').matches) { e.preventDefault(); $('#composer').requestSubmit(); }
 });
 $('#input').addEventListener('input', e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; });
-$('#new-chat').addEventListener('click', () => {
-  state.history = []; state.chatIndex = null;
-  $('#messages').innerHTML = '<div class="empty"><p>Nova conversa.</p></div>';
-});
-
-// ---------- navegação ----------
-document.querySelectorAll('nav.bottom button').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('nav.bottom button').forEach(x => x.classList.toggle('active', x === b));
-  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === b.dataset.pane));
-}));
+$('#new-chat').addEventListener('click', () => { state.history = []; state.chatIndex = null; chatIntro(); });
+$('#open-chat').addEventListener('click', () => openChat());
 
 // ---------- definições ----------
 const dlg = $('#settings');
@@ -641,6 +956,10 @@ function openSettings() {
 }
 $('#open-settings').addEventListener('click', openSettings);
 $('#close-settings').addEventListener('click', () => dlg.close());
+$('#refresh').addEventListener('click', async () => {
+  try { setBanner('A atualizar…'); await loadArticles(); setBanner(''); classifyPending(); }
+  catch (err) { setBanner('Erro: ' + err.message); }
+});
 $('#save-settings').addEventListener('click', async () => {
   const before = cfg().provider;
   for (const k of CFG_KEYS) { try { localStorage.setItem('xmem_' + k, $('#' + k).value.trim()); } catch {} }
@@ -648,7 +967,7 @@ $('#save-settings').addEventListener('click', async () => {
   $('#settings-status').textContent = 'A ligar…';
   try {
     await loadArticles();
-    $('#settings-status').textContent = `Ligado ✅ (${state.articles.length} artigos)`;
+    $('#settings-status').textContent = `Ligado ✅ (${state.articles.length} recortes)`;
     setTimeout(() => dlg.close(), 800);
     classifyPending();
   } catch (err) {
@@ -656,7 +975,7 @@ $('#save-settings').addEventListener('click', async () => {
   }
 });
 $('#reclassify').addEventListener('click', async () => {
-  if (!confirm('Apagar os tópicos atuais e voltar a organizar tudo do zero? (usa a API para todos os artigos)')) return;
+  if (!confirm('Apagar os tópicos atuais e voltar a organizar tudo do zero? (usa a API para todos os recortes)')) return;
   await sb('articles?topics=not.is.null', { method: 'PATCH', body: JSON.stringify({ topics: null }) });
   state.articles.forEach(a => { a.topics = null; });
   dlg.close();
@@ -666,13 +985,21 @@ $('#reclassify').addEventListener('click', async () => {
 
 // ---------- arranque ----------
 (async () => {
+  try {
+    const v = localStorage.getItem('xmem_view');
+    if (v === 'embeds' || v === 'cards') {
+      state.view = v;
+      document.querySelectorAll('.views button').forEach(x => x.classList.toggle('active', x.dataset.view === v));
+    }
+  } catch {}
+  chatIntro();
   const c = cfg();
-  if (!c.supabaseUrl || !c.supabaseKey) { openSettings(); render(); return; }
+  if (!c.supabaseUrl || !c.supabaseKey) { render(); openSettings(); return; }
   try {
     await loadArticles();
     classifyPending();
   } catch (err) {
-    $('#list').innerHTML = `<li class="msg error">${escapeHtml(err.message)}</li>`;
+    $('#grid').innerHTML = `<div class="msg error">${escapeHtml(err.message)}</div>`;
   }
 })();
 </script>
