@@ -280,6 +280,9 @@
     .pc-dock { position: sticky; bottom: 0; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--bg) 30%); }
     .pc-dock .composer { max-width: 700px; }
 
+    .thread { margin-top: 8px; }
+    .thread-post { position: relative; padding: 18px 0 2px 22px; border-left: 2px solid var(--line); margin-left: 6px; }
+    .thread-post::before { content: ""; position: absolute; left: -7px; top: 26px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
     .post-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; margin: 2px 0; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-family: var(--ui); font-size: .82em; font-weight: 600; text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
     .post-chip:hover { background: var(--accent); color: #fff; }
 
@@ -974,10 +977,25 @@ function fetchFx(a) {
   const id = a.url.match(/status\/(\d+)/)?.[1];
   if (!id) return Promise.resolve(null);
   if (!fxCache.has(id)) {
-    fxCache.set(id, fetch(`https://api.fxtwitter.com/i/status/${id}`)
-      .then(r => (r.ok ? r.json() : null)).then(d => d?.tweet || null).catch(() => null));
+    const get = u => fetch(u).then(r => (r.ok ? r.json() : null)).catch(() => null);
+    fxCache.set(id, Promise.all([get(`https://api.fxtwitter.com/i/status/${id}`), get(`https://api.fxtwitter.com/2/thread/${id}`)])
+      .then(([one, th]) => {
+        const t = one?.tweet || null;
+        // continuação da thread: os posts seguintes do mesmo autor
+        if (t && Array.isArray(th?.thread) && th.thread.length > 1 && th.thread[0]?.id === id) t._thread = th.thread.slice(1);
+        return t;
+      }));
   }
   return fxCache.get(id);
+}
+
+function threadHtml(t) {
+  if (!t?._thread?.length) return '';
+  return `<div class="thread">${t._thread.map(p => `
+    <div class="thread-post">
+      <div class="full-body">${paragraphs(p.text)}</div>
+      ${fxMediaHtml(p.media)}
+    </div>`).join('')}</div>`;
 }
 
 function bestVariant(variants = []) {
@@ -1091,7 +1109,7 @@ function postViewHtml(a, t) {
       <h1 class="pv-title">${escapeHtml(art.title || '')}</h1>
       <div class="article">${articleHtml(art)}</div>`;
   } else if (t) {
-    body = `<div class="full-body">${paragraphs(t.text)}</div>${fxMediaHtml(t.media)}${fxQuoteHtml(t.quote)}`;
+    body = `<div class="full-body">${paragraphs(t.text)}</div>${fxMediaHtml(t.media)}${fxQuoteHtml(t.quote)}${threadHtml(t)}`;
   } else {
     // ainda sem a versão do X: o que está guardado
     const fallbackArticle = hasPost(a) && a.post.article;
@@ -1131,7 +1149,7 @@ state.pc = null; // conversa do post aberto
 
 function postContext(a, t) {
   if (t?.article) return `Título: ${t.article.title}\nAutor: ${t.author?.name} (@${t.author?.screen_name})\n\n${articlePlainText(t.article)}`;
-  if (t) return `Autor: ${t.author?.name} (@${t.author?.screen_name})\n\n${t.text}${t.quote ? `\n\n[Post citado de @${t.quote.author?.screen_name}]\n${t.quote.text}` : ''}${t.media?.all?.length ? `\n\n[${t.media.all.length} imagem/vídeo no post]` : ''}`;
+  if (t) return `Autor: ${t.author?.name} (@${t.author?.screen_name})\n\n${t.text}${t.quote ? `\n\n[Post citado de @${t.quote.author?.screen_name}]\n${t.quote.text}` : ''}${t.media?.all?.length ? `\n\n[${t.media.all.length} imagem/vídeo no post]` : ''}${(t._thread || []).map((p, i) => `\n\n(${i + 2}) ${p.text}`).join('')}`;
   return `Autor: ${authorOf(a).name} (${authorOf(a).handle})\n\n${a.text}`;
 }
 
