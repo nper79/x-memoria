@@ -1162,6 +1162,7 @@ async function askPost(question) {
 
 $('#pc-form').addEventListener('submit', async e => {
   e.preventDefault();
+  $('#pc-voice-hint').textContent = '';
   const q = $('#pc-input').value.trim();
   if (!q || !state.pc || state.pc.busy) return;
   state.pc.busy = true; $('#pc-send').disabled = true; $('#pc-input').value = ''; $('#pc-input').style.height = 'auto';
@@ -1368,6 +1369,7 @@ function assistantTextSince(i) {
 
 $('#composer').addEventListener('submit', async e => {
   e.preventDefault();
+  $('#voice-hint').textContent = '';
   const q = $('#input').value.trim();
   if (!q || state.busy) return;
   state.busy = true; $('#send').disabled = true; $('#input').value = ''; $('#input').style.height = 'auto';
@@ -1535,7 +1537,7 @@ function attachMic(mic, input, hint, form) {
     source.connect(proc);
     proc.connect(ctx.destination);
     mic.classList.add('listening');
-    hint.textContent = 'A gravar… carrega outra vez quando acabares.';
+    hint.textContent = 'A gravar… carrega no 🎤 outra vez quando acabares.';
     const timer = setTimeout(() => rec?.stop(), MAX_RECORDING_MS);
 
     rec = {
@@ -1556,8 +1558,9 @@ function attachMic(mic, input, hint, form) {
           if (!text) { hint.textContent = 'Não percebi — tenta outra vez.'; return; }
           input.value = (input.value.trim() ? input.value.trim() + ' ' : '') + text;
           input.dispatchEvent(new Event('input'));
-          hint.textContent = '';
-          form.requestSubmit();
+          hint.textContent = 'Revê o texto e carrega em enviar.';
+          input.focus();
+          input.setSelectionRange(input.value.length, input.value.length);
         } catch (err) {
           hint.textContent = 'Não consegui transcrever: ' + err.message;
         } finally {
@@ -1580,8 +1583,11 @@ function attachMic(mic, input, hint, form) {
     r.onend = () => {
       mic.classList.remove('listening');
       rec = null;
-      if (heard.trim()) { hint.textContent = ''; form.requestSubmit(); }
-      else if (hint.textContent.startsWith('A ouvir')) hint.textContent = '';
+      if (heard.trim()) {
+        hint.textContent = 'Revê o texto e carrega em enviar.';
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      } else if (hint.textContent.startsWith('A ouvir')) hint.textContent = '';
     };
     rec = { stop: () => r.stop() };
     r.start();
