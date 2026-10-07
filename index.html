@@ -1453,10 +1453,10 @@ $('#new-chat').addEventListener('click', newChat);
 $('#new-chat-m').addEventListener('click', newChat);
 $('#toggle-chats').addEventListener('click', () => document.body.classList.toggle('show-chats'));
 
-// ---------- voz: gravar e transcrever com o MiMo (Xiaomi) pelo OpenRouter ----------
+// ---------- voz: gravar e transcrever pelo OpenRouter (Gemini 2.5 Flash Lite: ~1 s e ~0,00001 $ por pergunta) ----------
 // Grava o microfone em WAV 16 kHz mono (formato que o OpenRouter aceita) e manda transcrever.
 // Sem chave do OpenRouter, usa o reconhecimento de voz do próprio browser.
-const TRANSCRIBE_MODEL = 'xiaomi/mimo-v2.6-flash';
+const TRANSCRIBE_MODEL = 'google/gemini-2.5-flash-lite'; // o MiMo testado demorava >20 s
 const MAX_RECORDING_MS = 120000;
 
 function encodeWav(samples, rate) {
@@ -1505,12 +1505,13 @@ async function transcribe(wavBase64) {
     messages: [{
       role: 'user',
       content: [
-        { type: 'text', text: 'Transcreve este áudio palavra por palavra, na língua em que é falado (normalmente português de Portugal). Corrige só a pontuação. Devolve apenas o texto transcrito, sem aspas nem comentários. Se não houver fala, devolve vazio.' },
+        { type: 'text', text: 'Transcreve este áudio palavra por palavra, na língua em que é falado (normalmente português de Portugal). Corrige só a pontuação. Devolve apenas o texto transcrito, sem aspas nem comentários. Se não houver fala humana clara (silêncio, ruído, música), devolve exatamente: [vazio]' },
         { type: 'input_audio', input_audio: { data: wavBase64, format: 'wav' } }
       ]
     }]
   });
-  return (choice.message?.content || '').trim().replace(/^["“]|["”]$/g, '');
+  const text = (choice.message?.content || '').trim().replace(/^["“]|["”]$/g, '');
+  return /^\[?vazio\]?$/i.test(text) ? '' : text;
 }
 
 function attachMic(mic, input, hint, form) {
