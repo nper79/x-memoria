@@ -8,310 +8,305 @@
   <title>X Memória</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --paper: #f3eee4;
-      --card: #fbf8f1;
-      --ink: #1c1a16;
-      --ink-soft: #3d3930;
-      --muted: #7a7264;
-      --rule: #d8cfbf;
+      --bg: #f5f1ea;
+      --surface: #fffdf9;
+      --ink: #1d1b17;
+      --ink-2: #4a453c;
+      --muted: #8a8274;
+      --line: #e4ddd0;
       --accent: #c2410c;
-      --accent-soft: rgba(194, 65, 12, .09);
-      --shadow: 0 1px 0 rgba(28,26,22,.04), 0 12px 30px -18px rgba(28,26,22,.35);
-      --serif: "Instrument Serif", "Times New Roman", serif;
-      --text: "Newsreader", Georgia, serif;
-      --mono: "JetBrains Mono", ui-monospace, monospace;
+      --accent-soft: #c2410c14;
+      --serif: "Instrument Serif", Georgia, serif;
+      --read: "Newsreader", Georgia, serif;
+      --ui: "Instrument Sans", system-ui, sans-serif;
+      --top: 60px;
       color-scheme: light;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --paper: #13110e;
-        --card: #1b1915;
-        --ink: #eee7da;
-        --ink-soft: #cdc5b6;
-        --muted: #8d8576;
-        --rule: #2f2b24;
+        --bg: #12110f;
+        --surface: #1a1916;
+        --ink: #efe9de;
+        --ink-2: #c9c1b2;
+        --muted: #8b8476;
+        --line: #2b2823;
         --accent: #f0743b;
-        --accent-soft: rgba(240, 116, 59, .12);
-        --shadow: 0 1px 0 rgba(0,0,0,.3), 0 16px 34px -20px rgba(0,0,0,.9);
+        --accent-soft: #f0743b1f;
         color-scheme: dark;
       }
     }
-
     * { box-sizing: border-box; }
-    html, body { margin: 0; min-height: 100%; }
-    body {
-      background: var(--paper);
-      color: var(--ink);
-      font: 17px/1.55 var(--text);
-      -webkit-font-smoothing: antialiased;
+    html, body { margin: 0; height: 100%; }
+    body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--ui); -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); }
+    button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+    input, textarea, select {
+      font: inherit; color: var(--ink); background: var(--surface);
+      border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%;
     }
-    /* grão de papel */
-    body::before {
-      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .35;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 0 0.33 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
-    a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-    button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
-    input, select, textarea {
-      font: inherit; color: var(--ink); background: var(--card);
-      border: 1px solid var(--rule); border-radius: 2px; padding: 10px 12px; width: 100%;
-    }
-    input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-    .mono { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
+    input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
     .hidden { display: none !important; }
+    .muted { color: var(--muted); }
 
-    .btn {
-      font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
-      border: 1px solid var(--ink); padding: 9px 14px; border-radius: 2px; transition: background .15s, color .15s;
+    /* ---------- barra de topo ---------- */
+    .top {
+      position: sticky; top: 0; z-index: 20; height: var(--top);
+      display: flex; align-items: center; gap: 16px; padding: 0 20px;
+      background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
     }
-    .btn:hover { background: var(--ink); color: var(--paper); }
-    .btn.solid { background: var(--ink); color: var(--paper); }
-    .btn.solid:hover { background: var(--accent); border-color: var(--accent); }
-    .btn.danger { border-color: transparent; color: var(--muted); }
-    .btn.danger:hover { background: none; color: #b42318; }
+    .brand { font-family: var(--serif); font-size: 28px; line-height: 1; white-space: nowrap; }
+    .brand em { color: var(--accent); }
+    .modes { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; margin: 0 auto; }
+    .modes button { padding: 7px 18px; border-radius: 999px; font-weight: 500; color: var(--muted); }
+    .modes button.active { background: var(--ink); color: var(--bg); }
+    .top-right { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    #banner { font-size: 13px; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+    .icon-btn { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
+    .icon-btn:hover { background: var(--surface); color: var(--ink); }
 
-    /* ---------- estrutura ---------- */
-    .app { position: relative; z-index: 1; display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
-    aside.side {
-      position: sticky; top: 0; height: 100vh; overflow-y: auto;
-      border-right: 1px solid var(--rule); padding: 28px 24px 24px; display: flex; flex-direction: column; gap: 22px;
+    .mode { display: none; }
+    .mode.active { display: grid; }
+
+    /* ---------- LER ---------- */
+    #read { grid-template-columns: 240px minmax(0, 1fr); min-height: calc(100vh - var(--top)); }
+    .topics {
+      position: sticky; top: var(--top); align-self: start; height: calc(100vh - var(--top)); overflow-y: auto;
+      padding: 22px 14px 22px 20px; border-right: 1px solid var(--line);
     }
-    .masthead h1 {
-      font-family: var(--serif); font-weight: 400; font-size: 54px; line-height: .9; margin: 0; letter-spacing: -.01em;
+    .topics .search { margin-bottom: 18px; }
+    .topics h3 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px 8px; }
+    .topics ul { list-style: none; margin: 0; padding: 0; }
+    .topics li button { width: 100%; display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; border-radius: 8px; color: var(--ink-2); text-align: left; }
+    .topics li button:hover { background: var(--surface); }
+    .topics li button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+    .topics li button .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    .feed { padding: 34px 24px 120px; }
+    .feed-inner { max-width: 660px; margin: 0 auto; }
+    .feed-title { font-family: var(--serif); font-weight: 400; font-size: 46px; line-height: 1; margin: 0 0 6px; }
+    .feed-title em { color: var(--accent); }
+    .feed-sub { color: var(--muted); margin-bottom: 26px; }
+
+    .post {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+      padding: 22px 26px 16px; margin-bottom: 18px;
+      animation: rise .4s both; animation-delay: calc(var(--i, 0) * 30ms);
     }
-    .masthead h1 em { color: var(--accent); }
-    .masthead .sub { margin-top: 10px; color: var(--muted); }
-    #banner { color: var(--accent); min-height: 1em; }
-    #banner:not(:empty)::before { content: "● "; animation: pulse 1.2s infinite; }
-    @keyframes pulse { 50% { opacity: .2; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+    .post-head { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #fff; font-size: 16px; }
+    .who { min-width: 0; flex: 1; }
+    .who .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .who .meta { color: var(--muted); font-size: 13.5px; }
+    .post-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .tag { font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-soft); padding: 2px 9px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+    .post-title { font-family: var(--serif); font-weight: 400; font-size: 27px; line-height: 1.12; margin: 16px 0 0; }
+    .post-body { font-family: var(--read); font-size: 19px; line-height: 1.62; margin-top: 12px; color: var(--ink); overflow-wrap: anywhere; }
+    .post-body p { margin: 0 0 .8em; }
+    .post-body p:last-child { margin-bottom: 0; }
+    .post-body a { text-decoration: none; }
+    .post-body.clamped { max-height: 420px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+    .read-more { margin-top: 6px; color: var(--accent); font-weight: 600; }
+    .quote { margin: 14px 0 0; padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; font-family: var(--read); font-size: 16.5px; color: var(--ink-2); white-space: pre-wrap; }
+    .quote::before { content: "Citação"; display: block; font: 600 11px var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .linkcard { margin: 14px 0 0; padding: 12px 16px; border-left: 3px solid var(--accent); background: var(--bg); border-radius: 0 10px 10px 0; font-size: 14.5px; color: var(--ink-2); white-space: pre-wrap; }
+    .media { display: grid; gap: 4px; margin-top: 14px; border-radius: 14px; overflow: hidden; }
+    .media.n2, .media.n4 { grid-template-columns: 1fr 1fr; }
+    .media.n3 { grid-template-columns: 1fr 1fr; }
+    .media.n3 a:first-child { grid-row: span 2; }
+    .media img { width: 100%; height: 100%; max-height: 520px; object-fit: cover; display: block; background: var(--line); }
+    .media.n1 img { max-height: 640px; object-fit: contain; background: transparent; }
+    .post-foot { display: flex; gap: 18px; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    .post-foot a, .post-foot button { color: var(--muted); text-decoration: none; }
+    .post-foot a:hover, .post-foot button:hover { color: var(--accent); }
+    .post-foot .spacer { flex: 1; }
+    .summary-line { margin-top: 10px; font-size: 14px; color: var(--muted); }
+    .summary-line b { color: var(--ink-2); font-weight: 600; }
 
-    .toc h2 { margin: 0 0 8px; color: var(--muted); font-weight: 400; }
-    .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: t; }
-    .toc li button {
-      width: 100%; display: flex; align-items: baseline; gap: 8px; padding: 5px 0; text-align: left;
-      font-size: 17px; color: var(--ink-soft);
-    }
-    .toc li button .num { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 20px; flex: none; }
-    .toc li button .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .toc li button .dots { flex: 1; border-bottom: 1px dotted var(--rule); transform: translateY(-4px); min-width: 12px; }
-    .toc li button .n { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-    .toc li button:hover .name { color: var(--accent); }
-    .toc li button.active .name { color: var(--accent); font-style: italic; }
-    .toc li button.active .num { color: var(--accent); }
-    .side-foot { margin-top: auto; display: flex; gap: 14px; color: var(--muted); }
-    .side-foot button:hover { color: var(--accent); }
+    .more { display: block; margin: 10px auto 0; padding: 10px 22px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+    .empty { text-align: center; color: var(--muted); padding: 70px 10px; }
+    .empty .big { font-family: var(--serif); font-size: 38px; color: var(--ink); line-height: 1.1; margin-bottom: 8px; }
 
-    main.feed { padding: 28px clamp(16px, 4vw, 56px) 120px; min-width: 0; }
-    .feed-head { display: flex; flex-wrap: wrap; align-items: end; gap: 16px 24px; border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 26px; }
-    .feed-head h2 { font-family: var(--serif); font-weight: 400; font-size: 40px; line-height: 1; margin: 0; flex: 1; min-width: 220px; }
-    .feed-head h2 em { color: var(--accent); }
-    .feed-head h2 small { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .06em; margin-left: 8px; vertical-align: middle; }
-    .search { position: relative; width: min(320px, 100%); }
-    .search input { padding-left: 34px; background: transparent; border-width: 0 0 1px; border-radius: 0; }
-    .search::before { content: "⌕"; position: absolute; left: 8px; top: 7px; font-size: 20px; color: var(--muted); }
-    .views { display: flex; border: 1px solid var(--rule); }
-    .views button { padding: 7px 12px; color: var(--muted); }
-    .views button.active { background: var(--ink); color: var(--paper); }
+    /* ---------- CONVERSAR ---------- */
+    #chat { grid-template-columns: 260px minmax(0, 1fr); height: calc(100vh - var(--top)); }
+    .chats { border-right: 1px solid var(--line); padding: 18px 12px; overflow-y: auto; }
+    .new-chat { width: 100%; padding: 10px 14px; border-radius: 10px; background: var(--ink); color: var(--bg); font-weight: 600; text-align: left; margin-bottom: 18px; }
+    .chats h3 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px 8px; }
+    .chats ul { list-style: none; margin: 0; padding: 0; }
+    .chats li { display: flex; align-items: center; border-radius: 8px; }
+    .chats li:hover { background: var(--surface); }
+    .chats li.active { background: var(--accent-soft); }
+    .chats li .open { flex: 1; min-width: 0; text-align: left; padding: 8px 10px; }
+    .chats li .open .t { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); }
+    .chats li.active .open .t { color: var(--accent); font-weight: 600; }
+    .chats li .open .d { display: block; font-size: 12px; color: var(--muted); }
+    .chats li .del { padding: 6px 10px; color: var(--muted); opacity: 0; }
+    .chats li:hover .del { opacity: 1; }
+    .chats .none { color: var(--muted); font-size: 14px; padding: 0 8px; }
 
-    /* ---------- cartões ---------- */
-    .grid { columns: 300px; column-gap: 22px; }
-    .card {
-      break-inside: avoid; margin: 0 0 22px; background: var(--card); box-shadow: var(--shadow);
-      padding: 20px 20px 16px; position: relative; cursor: pointer;
-      border-top: 3px solid var(--ink); transition: transform .2s ease, border-color .2s;
-      animation: rise .5s both; animation-delay: calc(var(--i, 0) * 35ms);
-    }
-    .card:hover { transform: translateY(-3px) rotate(-.2deg); border-top-color: var(--accent); }
-    @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
-    .card .tags { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--accent); margin-bottom: 10px; }
-    .card h3 { font-family: var(--serif); font-weight: 400; font-size: 27px; line-height: 1.08; margin: 0 0 10px; }
-    .card p { margin: 0; color: var(--ink-soft); font-size: 16px; }
-    .card .by { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 10px; color: var(--muted); }
-    .card .by span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .card.untagged { border-top-style: dashed; }
-
-    .embed-slot { break-inside: avoid; margin: 0 0 22px; min-height: 120px; animation: rise .5s both; }
-    .embed-slot .fallback { background: var(--card); box-shadow: var(--shadow); padding: 18px; }
-    .embed-slot .loading { color: var(--muted); padding: 30px 0; text-align: center; }
-    .twitter-tweet { margin: 0 auto !important; }
-    .slot-head { width: 100%; display: flex; justify-content: space-between; gap: 10px; padding: 6px 2px 8px; color: var(--accent); border-top: 3px solid var(--ink); }
-    .slot-head span:last-child { color: var(--muted); }
-    .slot-head:hover span:last-child { color: var(--accent); }
-
-    .more { display: flex; justify-content: center; margin-top: 10px; }
-    .empty-state { text-align: center; padding: 80px 20px; color: var(--muted); }
-    .empty-state .big { font-family: var(--serif); font-size: 44px; color: var(--ink); line-height: 1.05; margin-bottom: 10px; }
-
-    /* ---------- painel de leitura ---------- */
-    .scrim { position: fixed; inset: 0; background: rgba(20,18,14,.45); z-index: 30; opacity: 0; pointer-events: none; transition: opacity .25s; }
-    .scrim.on { opacity: 1; pointer-events: auto; }
-    .drawer {
-      position: fixed; top: 0; right: 0; bottom: 0; z-index: 40; width: min(620px, 100vw);
-      background: var(--paper); border-left: 1px solid var(--rule); box-shadow: -30px 0 60px -40px rgba(0,0,0,.5);
-      transform: translateX(102%); transition: transform .32s cubic-bezier(.2,.7,.2,1);
-      display: flex; flex-direction: column;
-    }
-    .drawer:not(.on) { box-shadow: none; visibility: hidden; transition: transform .32s cubic-bezier(.2,.7,.2,1), visibility 0s .32s; }
-    .drawer.on { transform: none; }
-    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-bottom: 1px solid var(--rule); color: var(--muted); }
-    .drawer-head .x { font-size: 26px; line-height: 1; color: var(--ink); padding: 0 4px; }
-    .drawer-body { overflow-y: auto; padding: 26px 30px 40px; flex: 1; }
-    .reader .tags { color: var(--accent); display: flex; flex-wrap: wrap; gap: 4px 12px; }
-    .reader h2 { font-family: var(--serif); font-weight: 400; font-size: 44px; line-height: 1.02; margin: 12px 0 12px; }
-    .reader .meta { color: var(--muted); margin-bottom: 18px; }
-    .reader .standfirst { font-style: italic; font-size: 20px; color: var(--ink-soft); border-left: 3px solid var(--accent); padding-left: 14px; margin: 0 0 24px; }
-    .reader .embed { min-height: 80px; margin: 0 0 18px; }
-    .reader details { border-top: 1px solid var(--rule); padding-top: 12px; }
-    .reader summary { cursor: pointer; color: var(--muted); list-style: none; }
-    .reader summary::before { content: "＋ "; }
-    .reader details[open] summary::before { content: "－ "; }
-    .reader .saved-text { white-space: pre-wrap; font-size: 17px; margin-top: 12px; }
-    .reader .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; padding-top: 18px; border-top: 2px solid var(--ink); }
-
-    /* ---------- chat ---------- */
-    .chat-fab {
-      position: fixed; right: 22px; bottom: 22px; z-index: 20;
-      background: var(--ink); color: var(--paper); border-radius: 999px; padding: 14px 20px 14px 18px;
-      display: flex; align-items: center; gap: 10px; box-shadow: 0 14px 30px -12px rgba(0,0,0,.6);
-      font-family: var(--serif); font-size: 21px; font-style: italic; transition: transform .2s, background .2s;
-    }
-    .chat-fab:hover { transform: translateY(-2px); background: var(--accent); }
-    .chat-fab .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
-    .chat-fab:hover .dot { background: var(--paper); }
-    .chat .drawer-body { display: flex; flex-direction: column; gap: 16px; padding: 22px 26px; }
-    .chat-intro { margin: auto 0; text-align: left; }
-    .chat-intro .big { font-family: var(--serif); font-size: 40px; line-height: 1.02; margin-bottom: 14px; }
-    .chat-intro .big em { color: var(--accent); }
-    .suggest { display: flex; flex-direction: column; gap: 8px; }
-    .suggest button { text-align: left; border: 1px solid var(--rule); padding: 10px 12px; font-style: italic; color: var(--ink-soft); background: var(--card); }
-    .suggest button:hover { border-color: var(--accent); color: var(--accent); }
-    .msg { white-space: pre-wrap; word-wrap: break-word; max-width: 100%; }
-    .msg.user { align-self: flex-end; background: var(--ink); color: var(--paper); padding: 10px 14px; max-width: 85%; border-radius: 2px; }
-    .msg.assistant { font-size: 17.5px; border-left: 2px solid var(--accent); padding-left: 14px; }
+    .conversation { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+    .conv-head { display: none; }
+    #messages { flex: 1; overflow-y: auto; padding: 30px 24px 20px; }
+    .messages-inner { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+    .msg { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .msg.user { align-self: flex-end; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 18px 18px 4px 18px; max-width: 82%; }
+    .msg.assistant { font-family: var(--read); font-size: 18px; line-height: 1.6; }
     .msg.assistant b { font-weight: 600; }
-    .msg.activity { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; color: var(--muted); }
-    .msg.error { color: #b42318; border: 1px solid currentColor; padding: 10px 12px; }
-    .composer { border-top: 1px solid var(--rule); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: flex-end; }
-    .composer textarea { resize: none; max-height: 160px; background: var(--card); }
+    .msg.activity { font-size: 13px; color: var(--muted); }
+    .msg.activity::before { content: "· "; }
+    .msg.error { color: #b42318; border: 1px solid currentColor; padding: 10px 14px; border-radius: 10px; }
+    .intro { padding-top: 6vh; }
+    .intro .big { font-family: var(--serif); font-size: 50px; line-height: 1; margin-bottom: 12px; }
+    .intro .big em { color: var(--accent); }
+    .suggest { display: grid; gap: 10px; margin-top: 22px; }
+    .suggest button { text-align: left; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-family: var(--read); font-size: 17px; color: var(--ink-2); }
+    .suggest button:hover { border-color: var(--accent); color: var(--ink); }
+
+    .composer-wrap { padding: 12px 24px calc(16px + env(safe-area-inset-bottom)); }
+    .composer {
+      max-width: 720px; margin: 0 auto; display: flex; align-items: flex-end; gap: 8px;
+      background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 8px 8px 8px 16px;
+      box-shadow: 0 10px 30px -20px rgba(0,0,0,.4);
+    }
+    .composer textarea { border: 0; padding: 8px 0; background: transparent; resize: none; max-height: 180px; outline: none; font-size: 16px; }
+    .composer textarea:focus { outline: none; }
+    .mic, .send { width: 42px; height: 42px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+    .mic { color: var(--ink-2); }
+    .mic:hover { background: var(--bg); }
+    .mic.listening { background: #dc2626; color: #fff; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 #dc262666; } 50% { box-shadow: 0 0 0 10px #dc262600; } }
+    .send { background: var(--ink); color: var(--bg); }
+    .send:disabled { opacity: .4; }
+    .voice-hint { max-width: 720px; margin: 6px auto 0; font-size: 12.5px; color: var(--muted); text-align: center; min-height: 1em; }
 
     /* ---------- definições ---------- */
-    dialog { border: 1px solid var(--rule); background: var(--paper); color: var(--ink); width: min(520px, calc(100vw - 32px)); padding: 26px; box-shadow: var(--shadow); }
-    dialog::backdrop { background: rgba(20,18,14,.5); }
+    dialog { border: 1px solid var(--line); border-radius: 18px; background: var(--bg); color: var(--ink); width: min(500px, calc(100vw - 32px)); padding: 24px; }
+    dialog::backdrop { background: rgba(0,0,0,.45); }
     dialog h2 { font-family: var(--serif); font-weight: 400; font-size: 34px; margin: 0 0 4px; }
-    dialog label { display: block; margin: 14px 0 6px; color: var(--muted); }
+    dialog label { display: block; margin: 14px 0 6px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
     dialog .row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 22px; }
-    .hint { color: var(--muted); font-size: 14px; }
+    .btn { padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-weight: 500; }
+    .btn.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .btn.quiet { border-color: transparent; background: none; color: var(--muted); }
+    .reveal-wrap { position: relative; }
+    .reveal-wrap input { padding-right: 86px; }
+    .reveal-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 8px; color: var(--muted); }
 
     /* ---------- telemóvel ---------- */
-    @media (max-width: 860px) {
-      .app { grid-template-columns: 1fr; }
-      aside.side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule); padding: 20px 16px 12px; gap: 14px; }
-      .masthead { display: flex; align-items: end; justify-content: space-between; gap: 10px; }
-      .masthead h1 { font-size: 40px; }
-      .masthead .sub { margin: 0; text-align: right; }
-      .toc h2 { display: none; }
-      .toc ol { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
-      .toc li button { border: 1px solid var(--rule); padding: 5px 12px; white-space: nowrap; font-size: 15px; background: var(--card); }
-      .toc li button.active { border-color: var(--accent); }
-      .toc li button .num, .toc li button .dots { display: none; }
-      .side-foot { position: absolute; top: 22px; right: 16px; }
-      .masthead .sub { display: none; }
-      main.feed { padding: 18px 16px 110px; }
-      .feed-head h2 { font-size: 32px; }
-      .grid { columns: 1; }
-      .drawer-body { padding: 20px 18px 40px; }
-      .reader h2 { font-size: 36px; }
-      .chat-fab { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); }
+    @media (max-width: 820px) {
+      .top { padding: 0 10px; gap: 6px; }
+      .top-right { gap: 0; }
+      #refresh { display: none; }
+      .brand { font-size: 22px; }
+      #banner { display: none; }
+      .modes button { padding: 6px 14px; }
+      #read { grid-template-columns: minmax(0, 1fr); }
+      .topics { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 10px 12px; background: var(--bg); }
+      .topics .search { margin-bottom: 8px; }
+      .topics h3 { display: none; }
+      .topics ul { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+      .topics li button { white-space: nowrap; border: 1px solid var(--line); background: var(--surface); padding: 5px 12px; border-radius: 999px; }
+      .feed { padding: 20px 10px 100px; }
+      .feed-title { font-size: 36px; }
+      .post { padding: 18px 16px 12px; border-radius: 14px; }
+      .post-body { font-size: 18px; }
+      .post-tags { display: none; }
+      .post-foot { gap: 14px; font-size: 13.5px; white-space: nowrap; }
+      #chat { grid-template-columns: minmax(0, 1fr); height: calc(100dvh - var(--top)); }
+      .chats { display: none; position: fixed; inset: var(--top) 0 0 0; z-index: 15; background: var(--bg); border: 0; }
+      body.show-chats .chats { display: block; }
+      .conv-head { display: flex; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--line); }
+      #messages { padding: 20px 14px; }
+      .intro .big { font-size: 40px; }
+      .composer-wrap { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); }
     }
-  
-    .reveal-wrap { position: relative; }
-    .reveal-wrap input { padding-right: 84px; }
-    .reveal-btn {
-      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-      font: 11px/1 ui-monospace, "JetBrains Mono", monospace; letter-spacing: .05em; text-transform: uppercase;
-      background: none; border: 0; cursor: pointer; padding: 6px 8px; color: inherit; opacity: .6;
-    }
-    .reveal-btn:hover { opacity: 1; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="side">
-      <div class="masthead">
-        <h1>X <em>Memória</em></h1>
-        <div class="sub mono" id="tally"></div>
-      </div>
-      <div id="banner" class="mono"></div>
-      <nav class="toc">
-        <h2 class="mono">Índice</h2>
-        <ol id="topics"></ol>
-      </nav>
-      <div class="side-foot mono">
-        <button id="open-settings">Definições</button>
-        <button id="refresh">Atualizar</button>
-      </div>
+  <header class="top">
+    <div class="brand">X <em>Memória</em></div>
+    <nav class="modes">
+      <button data-mode="read" class="active">Ler</button>
+      <button data-mode="chat">Conversar</button>
+    </nav>
+    <div class="top-right">
+      <span id="banner"></span>
+      <button class="icon-btn" id="refresh" title="Atualizar">↻</button>
+      <button class="icon-btn" id="open-settings" title="Definições">⚙</button>
+    </div>
+  </header>
+
+  <!-- ===== LER ===== -->
+  <section id="read" class="mode active">
+    <aside class="topics">
+      <div class="search"><input id="search" type="search" placeholder="Procurar…" aria-label="Procurar"></div>
+      <h3>Tópicos</h3>
+      <ul id="topics"></ul>
     </aside>
-
     <main class="feed">
-      <div class="feed-head">
-        <h2 id="feed-title">Todos os recortes</h2>
-        <div class="search"><input id="search" type="search" placeholder="Procurar…" aria-label="Procurar"></div>
-        <div class="views mono" role="tablist">
-          <button data-view="cards" class="active">Resumos</button>
-          <button data-view="embeds">Originais</button>
-        </div>
+      <div class="feed-inner">
+        <h1 class="feed-title" id="feed-title">Tudo</h1>
+        <div class="feed-sub" id="feed-sub"></div>
+        <div id="feed"></div>
+        <button id="more" class="more hidden">Mostrar mais</button>
       </div>
-      <div id="grid" class="grid"></div>
-      <div class="more"><button id="more" class="btn hidden">Mostrar mais</button></div>
     </main>
-  </div>
-
-  <button class="chat-fab" id="open-chat"><span class="dot"></span>Perguntar à memória</button>
-
-  <div class="scrim" id="scrim"></div>
-
-  <section class="drawer reader-drawer" id="reader" aria-label="Artigo">
-    <div class="drawer-head"><span class="mono">Recorte</span><button class="x" data-close>×</button></div>
-    <div class="drawer-body reader" id="reader-body"></div>
   </section>
 
-  <section class="drawer chat" id="chat" aria-label="Conversa">
-    <div class="drawer-head">
-      <span class="mono">Conversa</span>
-      <span><button class="mono" id="new-chat" style="margin-right:16px">Nova</button><button class="x" data-close>×</button></span>
+  <!-- ===== CONVERSAR ===== -->
+  <section id="chat" class="mode">
+    <aside class="chats">
+      <button class="new-chat" id="new-chat">＋ Nova conversa</button>
+      <h3>Conversas guardadas</h3>
+      <ul id="chat-list"></ul>
+    </aside>
+    <div class="conversation">
+      <div class="conv-head">
+        <button class="btn" id="toggle-chats">☰ Conversas</button>
+        <button class="btn" id="new-chat-m">＋ Nova</button>
+      </div>
+      <div id="messages"><div class="messages-inner" id="messages-inner"></div></div>
+      <div class="composer-wrap">
+        <form class="composer" id="composer">
+          <textarea id="input" rows="1" placeholder="Pergunta à tua memória…"></textarea>
+          <button type="button" class="mic" id="mic" title="Falar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
+          <button type="submit" class="send" id="send" title="Enviar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </form>
+        <div class="voice-hint" id="voice-hint"></div>
+      </div>
     </div>
-    <div class="drawer-body" id="messages"></div>
-    <form class="composer" id="composer">
-      <textarea id="input" rows="1" placeholder="Pergunta à tua memória…"></textarea>
-      <button type="submit" id="send" class="btn solid">Enviar</button>
-    </form>
   </section>
 
   <dialog id="settings">
     <h2>Definições</h2>
-    <p class="hint">Ficam guardadas só neste browser. Usa os mesmos valores da extensão do Chrome.</p>
-    <label class="mono" for="supabaseUrl">URL do Supabase</label>
-    <input id="supabaseUrl" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off">
-    <label class="mono" for="supabaseKey">Chave do Supabase (publishable / anon)</label>
+    <p class="muted">O mais fácil: na extensão do Chrome, abre as definições e lê o código QR com o telemóvel.</p>
+    <label for="supabaseUrl">Endereço do Supabase</label>
+    <input id="supabaseUrl" autocomplete="off">
+    <label for="supabaseKey">Chave do Supabase</label>
     <input id="supabaseKey" type="password" autocomplete="off">
-    <label class="mono" for="provider">Fornecedor da IA</label>
+    <label for="provider">Fornecedor da IA</label>
     <select id="provider">
       <option value="openrouter">OpenRouter</option>
       <option value="anthropic">Anthropic (direto)</option>
     </select>
-    <label class="mono" for="apiKey">Chave da API</label>
-    <input id="apiKey" type="password" placeholder="sk-or-… (OpenRouter) ou sk-ant-… (Anthropic)" autocomplete="off">
-    <label class="mono" for="model">Modelo</label>
+    <label for="apiKey">Chave da IA</label>
+    <input id="apiKey" type="password" autocomplete="off">
+    <label for="model">Modelo</label>
     <select id="model">
       <option value="opus">Claude Opus 5.5 — melhor qualidade</option>
       <option value="sonnet">Claude Sonnet 5.5 — mais rápido e barato</option>
     </select>
-    <p id="settings-status" class="hint"></p>
+    <p id="settings-status" class="muted"></p>
     <div class="row">
-      <button class="btn danger" id="reclassify" type="button">Reorganizar tópicos</button>
+      <button class="btn quiet" id="reclassify" type="button">Reorganizar tópicos</button>
       <button class="btn" id="close-settings" type="button">Fechar</button>
       <button class="btn solid" id="save-settings" type="button">Guardar</button>
     </div>
@@ -325,14 +320,16 @@ const MODELS = {
   openrouter: { opus: 'anthropic/claude-opus-5.5', sonnet: 'anthropic/claude-sonnet-5.5' }
 };
 const BATCH = 15;
-const PAGE_SIZE = 60;
+const PAGE_SIZE = 25;
 
 const state = {
   articles: [],
-  topic: null,     // null = todos, '' = por organizar
-  view: 'cards',
+  topic: null,     // null = tudo, '' = por organizar
   limit: PAGE_SIZE,
-  history: [],     // mensagens da conversa (append-only)
+  history: [],     // mensagens enviadas à IA (append-only)
+  display: [],     // o que fica guardado: [{ role, text }]
+  chatId: null,
+  chatTitle: '',
   chatIndex: null, // snapshot dos artigos no início da conversa
   busy: false,
   classifying: false
@@ -354,12 +351,16 @@ const renderMarkdown = t => escapeHtml(t)
   .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
   .replace(/(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
 const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('pt-PT', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+const fmtShort = iso => iso ? new Date(iso).toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' }) : '';
 const topicsOf = a => Array.isArray(a.topics) ? a.topics : [];
 const setBanner = t => { $('#banner').textContent = t || ''; };
-const handle = a => (a.author || '').match(/@\w+/)?.[0] || a.author || a.source || '';
-const authorName = a => (a.author || '').replace(/@\w+.*$/, '').replace(/·.*$/, '').trim() || handle(a);
-const tweetId = url => url?.match(/status\/(\d+)/)?.[1] || null;
-const isDark = () => matchMedia('(prefers-color-scheme: dark)').matches;
+const handle = a => (a.author || '').match(/@\w+/)?.[0] || '';
+const authorName = a => (a.author || '').split('@')[0].replace(/[·\s]+$/, '').trim() || handle(a) || a.source || '';
+function avatarColor(s) {
+  let h = 0;
+  for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 360;
+  return `hsl(${h} 45% 45%)`;
+}
 
 // ---------- Supabase ----------
 async function sb(path, opts = {}) {
@@ -549,206 +550,6 @@ async function classifyPending() {
 }
 
 
-// ---------- embeds do X ----------
-let twttrPromise = null;
-function loadTwitter() {
-  twttrPromise ||= new Promise(resolve => {
-    const s = document.createElement('script');
-    s.src = 'https://platform.twitter.com/widgets.js';
-    s.async = true;
-    s.onload = () => window.twttr?.ready ? twttr.ready(() => resolve(window.twttr)) : resolve(null);
-    s.onerror = () => resolve(null);
-    document.head.appendChild(s);
-  });
-  return twttrPromise;
-}
-async function embedTweet(url, el) {
-  const id = tweetId(url);
-  if (!id) return false;
-  const tw = await loadTwitter();
-  if (!tw) return false;
-  try {
-    const node = await tw.widgets.createTweet(id, el, { theme: isDark() ? 'dark' : 'light', dnt: true, conversation: 'none', align: 'center' });
-    return Boolean(node);
-  } catch { return false; }
-}
-
-// ---------- biblioteca ----------
-function topicCounts() {
-  const m = new Map();
-  for (const a of state.articles) for (const t of topicsOf(a)) m.set(t, (m.get(t) || 0) + 1);
-  return new Map([...m].sort((a, b) => b[1] - a[1]));
-}
-
-function filtered() {
-  const q = $('#search').value.trim().toLowerCase();
-  let list = state.articles;
-  if (state.topic === '') list = list.filter(a => !topicsOf(a).length);
-  else if (state.topic) list = list.filter(a => topicsOf(a).includes(state.topic));
-  if (q) list = list.filter(a => `${a.title} ${a.author} ${a.summary} ${a.text}`.toLowerCase().includes(q));
-  return list;
-}
-
-function render() {
-  const counts = topicCounts();
-  const unsorted = state.articles.filter(a => !topicsOf(a).length).length;
-  $('#tally').textContent = `${state.articles.length} recortes · ${counts.size} tópicos`;
-
-  const item = (key, label, n, i) => `
-    <li><button data-t="${escapeHtml(key)}" class="${(key === '__all' ? state.topic === null : key === '__none' ? state.topic === '' : state.topic === key) ? 'active' : ''}">
-      <span class="num">${i}</span><span class="name">${escapeHtml(label)}</span><span class="dots"></span><span class="n">${n}</span>
-    </button></li>`;
-  let html = item('__all', 'Todos', state.articles.length, '—');
-  let i = 1;
-  for (const [t, n] of counts) html += item(t, t, n, String(i++).padStart(2, '0'));
-  if (unsorted) html += item('__none', 'Por organizar', unsorted, '··');
-  $('#topics').innerHTML = html;
-  $('#topics').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-    const t = b.dataset.t;
-    state.topic = t === '__all' ? null : t === '__none' ? '' : t;
-    state.limit = PAGE_SIZE;
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }));
-
-  $('#feed-title').innerHTML = (state.topic === null ? 'Todos os <em>recortes</em>' : state.topic === '' ? 'Por <em>organizar</em>' : `<em>${escapeHtml(state.topic)}</em>`) +
-    `<small>${filtered().length}</small>`;
-  renderGrid();
-}
-
-let embedObserver = null;
-function renderGrid() {
-  const list = filtered();
-  const grid = $('#grid');
-  embedObserver?.disconnect();
-  grid.innerHTML = '';
-
-  if (!list.length) {
-    grid.innerHTML = state.articles.length
-      ? `<div class="empty-state"><div class="big">Nada por aqui.</div>Experimenta outra pesquisa ou outro tópico.</div>`
-      : `<div class="empty-state"><div class="big">A tua memória está vazia.</div>Importa os teus Guardados do X com a extensão do Chrome — aparecem aqui sozinhos.</div>`;
-    $('#more').classList.add('hidden');
-    return;
-  }
-
-  const shown = list.slice(0, state.limit);
-  if (state.view === 'embeds') {
-    embedObserver = new IntersectionObserver(entries => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue;
-        embedObserver.unobserve(e.target);
-        const a = state.articles.find(x => x.id === e.target.dataset.id);
-        const box = e.target.querySelector('.embed-box');
-        embedTweet(a.url, box).then(ok => {
-          box.querySelector('.loading')?.remove();
-          if (!ok) box.innerHTML = fallbackCard(a);
-        });
-      }
-    }, { rootMargin: '600px' });
-    shown.forEach((a, i) => {
-      const slot = document.createElement('div');
-      slot.className = 'embed-slot';
-      slot.dataset.id = a.id;
-      slot.style.setProperty('--i', Math.min(i, 12));
-      slot.innerHTML = `
-        <button class="slot-head mono"><span>${topicsOf(a).map(escapeHtml).join(' · ') || 'por organizar'}</span><span>abrir recorte →</span></button>
-        <div class="embed-box"><div class="loading mono">A carregar ${escapeHtml(handle(a))}…</div></div>`;
-      slot.querySelector('.slot-head').addEventListener('click', () => openReader(a));
-      grid.appendChild(slot);
-      embedObserver.observe(slot);
-    });
-  } else {
-    shown.forEach((a, i) => {
-      const card = document.createElement('article');
-      card.className = 'card' + (topicsOf(a).length ? '' : ' untagged');
-      card.style.setProperty('--i', Math.min(i, 16));
-      card.innerHTML = `
-        <div class="tags mono">${topicsOf(a).map(escapeHtml).join('<span>·</span>') || 'por organizar'}</div>
-        <h3>${escapeHtml(a.title || a.text.slice(0, 90))}</h3>
-        <p>${escapeHtml(a.summary || a.text.slice(0, 220) + (a.text.length > 220 ? '…' : ''))}</p>
-        <div class="by mono"><span>${escapeHtml(handle(a))}</span><span>${fmtDate(a.posted_at || a.saved_at)}</span></div>`;
-      card.addEventListener('click', () => openReader(a));
-      grid.appendChild(card);
-    });
-  }
-  $('#more').classList.toggle('hidden', list.length <= state.limit);
-}
-
-function fallbackCard(a) {
-  return `<div class="fallback">
-    <div class="mono" style="color:var(--muted)">${escapeHtml(handle(a))} · post indisponível para embed</div>
-    <p style="white-space:pre-wrap;margin:10px 0 0">${escapeHtml(a.text.slice(0, 600))}</p>
-    <p class="mono" style="margin-top:10px"><a href="${escapeHtml(a.url)}" target="_blank" rel="noopener">Abrir no X ↗</a></p>
-  </div>`;
-}
-
-$('#search').addEventListener('input', () => { state.limit = PAGE_SIZE; render(); });
-$('#more').addEventListener('click', () => { state.limit += PAGE_SIZE; renderGrid(); });
-document.querySelectorAll('.views button').forEach(b => b.addEventListener('click', () => {
-  state.view = b.dataset.view;
-  document.querySelectorAll('.views button').forEach(x => x.classList.toggle('active', x === b));
-  try { localStorage.setItem('xmem_view', state.view); } catch {}
-  renderGrid();
-}));
-
-// ---------- painéis ----------
-function openDrawer(id) {
-  document.querySelectorAll('.drawer').forEach(d => d.classList.toggle('on', d.id === id));
-  $('#scrim').classList.add('on');
-  document.body.style.overflow = 'hidden';
-}
-function closeDrawers() {
-  document.querySelectorAll('.drawer').forEach(d => d.classList.remove('on'));
-  $('#scrim').classList.remove('on');
-  document.body.style.overflow = '';
-}
-$('#scrim').addEventListener('click', closeDrawers);
-document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeDrawers));
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#settings').open) closeDrawers(); });
-
-function openReader(a) {
-  const body = $('#reader-body');
-  body.innerHTML = `
-    <div class="tags mono">${topicsOf(a).map(escapeHtml).join('<span>·</span>') || 'por organizar'}</div>
-    <h2>${escapeHtml(a.title || a.text.slice(0, 90))}</h2>
-    <div class="meta mono">${escapeHtml(a.author || a.source)} · ${fmtDate(a.posted_at || a.saved_at)}</div>
-    ${a.summary ? `<p class="standfirst">${escapeHtml(a.summary)}</p>` : ''}
-    <div class="embed"><div class="mono" style="color:var(--muted)">A carregar o original…</div></div>
-    <details id="saved"><summary class="mono">Texto guardado</summary><div class="saved-text">${escapeHtml(a.text)}</div></details>
-    <div class="actions">
-      <button class="btn solid" data-act="ask">Perguntar sobre isto</button>
-      <a class="btn" href="${escapeHtml(a.url)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">Abrir no X ↗</a>
-      <button class="btn" data-act="topics">Editar tópicos</button>
-      <button class="btn danger" data-act="del">Apagar</button>
-    </div>`;
-  openDrawer('reader');
-  body.scrollTop = 0;
-
-  const slot = body.querySelector('.embed');
-  embedTweet(a.url, slot).then(ok => {
-    slot.querySelector('.mono')?.remove();
-    if (!ok) { slot.remove(); body.querySelector('#saved').open = true; }
-  });
-
-  body.querySelector('[data-act="ask"]').addEventListener('click', () => {
-    openChat(`Sobre o recorte “${a.title || a.text.slice(0, 60)}” de ${handle(a)}: `);
-  });
-  body.querySelector('[data-act="topics"]').addEventListener('click', async () => {
-    const v = prompt('Tópicos (separados por vírgulas):', topicsOf(a).join(', '));
-    if (v === null) return;
-    await updateArticle(a.id, { topics: v.split(',').map(s => s.trim()).filter(Boolean) });
-    render();
-    openReader(a);
-  });
-  body.querySelector('[data-act="del"]').addEventListener('click', async () => {
-    if (!confirm('Apagar este recorte da memória?')) return;
-    await sb(`articles?id=eq.${encodeURIComponent(a.id)}`, { method: 'DELETE' });
-    state.articles = state.articles.filter(x => x.id !== a.id);
-    closeDrawers();
-    render();
-  });
-}
-
 // ---------- chat com índice + ferramentas ----------
 const CHAT_PROMPT = `És o assistente de leitura pessoal do utilizador. Ele guarda posts e artigos do X (Twitter) e quer ajuda para tirar partido deles.
 
@@ -817,36 +618,182 @@ function runTool(block) {
 }
 
 
-// ---------- chat: interface ----------
+// ---------- LER: tópicos + posts em modo leitura ----------
+function topicCounts() {
+  const m = new Map();
+  for (const a of state.articles) for (const t of topicsOf(a)) m.set(t, (m.get(t) || 0) + 1);
+  return new Map([...m].sort((a, b) => b[1] - a[1]));
+}
+
+function filtered() {
+  const q = $('#search').value.trim().toLowerCase();
+  let list = state.articles;
+  if (state.topic === '') list = list.filter(a => !topicsOf(a).length);
+  else if (state.topic) list = list.filter(a => topicsOf(a).includes(state.topic));
+  if (q) list = list.filter(a => `${a.title} ${a.author} ${a.summary} ${a.text}`.toLowerCase().includes(q));
+  return list;
+}
+
+function render() {
+  const counts = topicCounts();
+  const unsorted = state.articles.filter(a => !topicsOf(a).length).length;
+  const items = [['__all', 'Tudo', state.articles.length], ...[...counts].map(([t, n]) => [t, t, n])];
+  if (unsorted && counts.size) items.push(['__none', 'Por organizar', unsorted]);
+  const isActive = k => k === '__all' ? state.topic === null : k === '__none' ? state.topic === '' : state.topic === k;
+  $('#topics').innerHTML = items.map(([k, label, n]) =>
+    `<li><button data-t="${escapeHtml(k)}" class="${isActive(k) ? 'active' : ''}"><span>${escapeHtml(label)}</span><span class="n">${n}</span></button></li>`).join('');
+  $('#topics').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const t = b.dataset.t;
+    selectTopic(t === '__all' ? null : t === '__none' ? '' : t);
+  }));
+  renderFeed();
+}
+
+function selectTopic(t) {
+  state.topic = t;
+  state.limit = PAGE_SIZE;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Texto do post → parágrafos, com links, @menções e citações.
+function formatPost(text) {
+  const [main, ...quotes] = String(text || '').split(/\n\n— citação —\n\n/);
+  let body = main, link = '';
+  const li = body.indexOf('\n\n[Link partilhado]\n');
+  if (li >= 0) { link = body.slice(li + 20); body = body.slice(0, li); }
+  const linkify = s => escapeHtml(s)
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|\s)@(\w{1,30})/g, '$1<a href="https://x.com/$2" target="_blank" rel="noopener">@$2</a>');
+  const paras = body.split(/\n{2,}/).map(p => `<p>${linkify(p).replace(/\n/g, '<br>')}</p>`).join('');
+  return {
+    body: paras,
+    quotes: quotes.map(q => `<div class="quote">${linkify(q)}</div>`).join(''),
+    link: link ? `<div class="linkcard">${linkify(link.trim())}</div>` : ''
+  };
+}
+
+function mediaHtml(images) {
+  const imgs = (Array.isArray(images) ? images : []).slice(0, 4)
+    .map(src => src.replace(/name=\w+/, 'name=medium'));
+  if (!imgs.length) return '';
+  return `<div class="media n${imgs.length}">${imgs.map(src =>
+    `<a href="${escapeHtml(src.replace(/name=\w+/, 'name=large'))}" target="_blank" rel="noopener"><img src="${escapeHtml(src)}" loading="lazy" alt="" onerror="this.closest('a').remove()"></a>`).join('')}</div>`;
+}
+
+function postHtml(a) {
+  const name = authorName(a), h = handle(a);
+  const { body, quotes, link } = formatPost(a.text);
+  const long = (a.text || '').length > 1400;
+  return `
+    <div class="post-head">
+      <div class="avatar" style="background:${avatarColor(h || name)}">${escapeHtml((name || '?')[0].toUpperCase())}</div>
+      <div class="who">
+        <div class="name">${escapeHtml(name)}</div>
+        <div class="meta">${escapeHtml(h)}${h ? ' · ' : ''}${fmtDate(a.posted_at || a.saved_at)}</div>
+      </div>
+      <div class="post-tags">${topicsOf(a).map(t => `<span class="tag" data-topic="${escapeHtml(t)}">${escapeHtml(t)}</span>`).join('')}</div>
+    </div>
+    ${a.summary ? `<div class="summary-line"><b>Resumo:</b> ${escapeHtml(a.summary)}</div>` : ''}
+    <div class="post-body ${long ? 'clamped' : ''}">${body}</div>
+    ${long ? '<button class="read-more">Continuar a ler</button>' : ''}
+    ${quotes}${link}${mediaHtml(a.images)}
+    <div class="post-foot">
+      <a href="${escapeHtml(a.url)}" target="_blank" rel="noopener">Ver no X ↗</a>
+      <button data-act="ask">Perguntar</button>
+      <span class="spacer"></span>
+      <button data-act="topics">Tópicos</button>
+      <button data-act="del">Apagar</button>
+    </div>`;
+}
+
+function renderFeed() {
+  const list = filtered();
+  const label = state.topic === null ? 'Tudo' : state.topic === '' ? 'Por <em>organizar</em>' : `<em>${escapeHtml(state.topic)}</em>`;
+  $('#feed-title').innerHTML = label;
+  $('#feed-sub').textContent = `${list.length} post${list.length === 1 ? '' : 's'}`;
+
+  const feed = $('#feed');
+  feed.innerHTML = '';
+  if (!list.length) {
+    feed.innerHTML = state.articles.length
+      ? '<div class="empty"><div class="big">Nada por aqui.</div>Experimenta outra pesquisa ou outro tópico.</div>'
+      : '<div class="empty"><div class="big">Ainda não há nada guardado.</div>Importa os teus Guardados do X com a extensão do Chrome.</div>';
+    $('#more').classList.add('hidden');
+    return;
+  }
+  list.slice(0, state.limit).forEach((a, i) => {
+    const el = document.createElement('article');
+    el.className = 'post';
+    el.style.setProperty('--i', Math.min(i, 10));
+    el.innerHTML = postHtml(a);
+    el.querySelector('.read-more')?.addEventListener('click', e => {
+      el.querySelector('.post-body').classList.remove('clamped');
+      e.currentTarget.remove();
+    });
+    el.querySelectorAll('.tag').forEach(t => t.addEventListener('click', () => selectTopic(t.dataset.topic)));
+    el.querySelector('[data-act="ask"]').addEventListener('click', () => {
+      setMode('chat');
+      $('#input').value = `Sobre o post de ${authorName(a)} (${handle(a)}) “${(a.title || a.text).slice(0, 70)}”: `;
+      $('#input').focus();
+    });
+    el.querySelector('[data-act="topics"]').addEventListener('click', async () => {
+      const v = prompt('Tópicos (separados por vírgulas):', topicsOf(a).join(', '));
+      if (v === null) return;
+      await updateArticle(a.id, { topics: v.split(',').map(s => s.trim()).filter(Boolean) });
+      render();
+    });
+    el.querySelector('[data-act="del"]').addEventListener('click', async () => {
+      if (!confirm('Apagar este post da memória?')) return;
+      await sb(`articles?id=eq.${encodeURIComponent(a.id)}`, { method: 'DELETE' });
+      state.articles = state.articles.filter(x => x.id !== a.id);
+      render();
+    });
+    feed.appendChild(el);
+  });
+  $('#more').classList.toggle('hidden', list.length <= state.limit);
+}
+
+$('#search').addEventListener('input', () => { state.limit = PAGE_SIZE; render(); });
+$('#more').addEventListener('click', () => { state.limit += PAGE_SIZE; renderFeed(); });
+
+// ---------- modos ----------
+function setMode(mode) {
+  document.querySelectorAll('.modes button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.querySelectorAll('.mode').forEach(m => m.classList.toggle('active', m.id === mode));
+  document.body.classList.remove('show-chats');
+  try { localStorage.setItem('xmem_mode', mode); } catch {}
+  if (mode === 'chat') { loadChats(); setTimeout(() => $('#input').focus(), 50); }
+}
+document.querySelectorAll('.modes button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+// ---------- CONVERSAR: mensagens ----------
 const SUGGESTIONS = [
-  'Vê os artigos de marketing — há algum de jeito? Qual achas melhor e porquê?',
-  'O que guardei nas últimas duas semanas? Faz-me um resumo por tema.',
-  'Que ideias se repetem em vários recortes?'
+  'Vê os posts de marketing — há algum de jeito? Qual achas melhor e porquê?',
+  'O que guardei nas últimas duas semanas? Resume por tema.',
+  'Que ideias se repetem em vários posts?'
 ];
 function chatIntro() {
-  $('#messages').innerHTML = `
-    <div class="chat-intro">
+  const voice = Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+  $('#messages-inner').innerHTML = `
+    <div class="intro">
       <div class="big">Pergunta à tua <em>memória</em>.</div>
-      <p class="hint">O Claude vê o índice de tudo o que guardaste e lê os recortes completos quando precisa.</p>
+      <div class="muted">O Claude vê o índice de tudo o que guardaste e lê os posts completos quando precisa.${voice ? ' Podes escrever ou carregar no 🎤 e falar.' : ''}</div>
       <div class="suggest">${SUGGESTIONS.map(s => `<button type="button">${escapeHtml(s)}</button>`).join('')}</div>
     </div>`;
-  $('#messages').querySelectorAll('.suggest button').forEach(b => b.addEventListener('click', () => {
+  $('#messages-inner').querySelectorAll('.suggest button').forEach(b => b.addEventListener('click', () => {
     $('#input').value = b.textContent;
     $('#composer').requestSubmit();
   }));
 }
-function openChat(prefill) {
-  openDrawer('chat');
-  if (prefill) { $('#input').value = prefill; }
-  setTimeout(() => { const i = $('#input'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 320);
-}
+
 function addMessage(role, text) {
-  $('#messages .chat-intro')?.remove();
+  $('#messages-inner .intro')?.remove();
   const el = document.createElement('div');
   el.className = `msg ${role}`;
   el.innerHTML = renderMarkdown(text);
-  $('#messages').appendChild(el);
-  el.scrollIntoView({ block: 'end' });
+  $('#messages-inner').appendChild(el);
+  $('#messages').scrollTop = $('#messages').scrollHeight;
   return el;
 }
 
@@ -940,20 +887,134 @@ async function askAnthropic(question) {
 }
 
 
+// Texto das respostas do assistente a partir de uma posição do histórico.
+function assistantTextSince(i) {
+  return state.history.slice(i)
+    .filter(m => m.role === 'assistant')
+    .map(m => typeof m.content === 'string' ? m.content : (m.content || []).filter(b => b.type === 'text').map(b => b.text).join(''))
+    .filter(t => t && t !== '(sem resposta)')
+    .join('\n\n');
+}
+
 $('#composer').addEventListener('submit', async e => {
   e.preventDefault();
   const q = $('#input').value.trim();
   if (!q || state.busy) return;
   state.busy = true; $('#send').disabled = true; $('#input').value = ''; $('#input').style.height = 'auto';
+  const start = state.history.length;
+  state.display.push({ role: 'user', text: q });
+  if (!state.chatTitle) state.chatTitle = q.slice(0, 90);
   try { await ask(q); } catch (err) { addMessage('error', err.message); }
-  finally { state.busy = false; $('#send').disabled = false; }
+  const answer = assistantTextSince(start);
+  if (answer) state.display.push({ role: 'assistant', text: answer });
+  state.busy = false; $('#send').disabled = false;
+  persistChat();
 });
 $('#input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey && matchMedia('(min-width: 861px)').matches) { e.preventDefault(); $('#composer').requestSubmit(); }
+  if (e.key === 'Enter' && !e.shiftKey && matchMedia('(min-width: 821px)').matches) { e.preventDefault(); $('#composer').requestSubmit(); }
 });
 $('#input').addEventListener('input', e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; });
-$('#new-chat').addEventListener('click', () => { state.history = []; state.chatIndex = null; chatIntro(); });
-$('#open-chat').addEventListener('click', () => openChat());
+
+// ---------- CONVERSAR: guardar e retomar conversas (tabela "chats" no Supabase) ----------
+async function persistChat() {
+  if (!state.display.length) return;
+  const body = { title: state.chatTitle, messages: state.display, updated_at: new Date().toISOString() };
+  try {
+    if (state.chatId) {
+      await sb(`chats?id=eq.${state.chatId}`, { method: 'PATCH', body: JSON.stringify(body) });
+    } else {
+      const rows = await sb('chats', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify(body) });
+      state.chatId = rows[0].id;
+    }
+    loadChats();
+  } catch (err) {
+    setBanner('Não consegui guardar a conversa');
+    console.warn(err);
+  }
+}
+
+async function loadChats() {
+  const list = $('#chat-list');
+  try {
+    const rows = await sb('chats?select=id,title,updated_at&order=updated_at.desc&limit=100');
+    list.innerHTML = rows.length ? '' : '<li class="none">Ainda não tens conversas.</li>';
+    for (const c of rows) {
+      const li = document.createElement('li');
+      li.className = c.id === state.chatId ? 'active' : '';
+      li.innerHTML = `<button class="open"><span class="t">${escapeHtml(c.title || 'Conversa')}</span><span class="d">${fmtShort(c.updated_at)}</span></button><button class="del" title="Apagar">✕</button>`;
+      li.querySelector('.open').addEventListener('click', () => openSavedChat(c.id));
+      li.querySelector('.del').addEventListener('click', async () => {
+        if (!confirm('Apagar esta conversa?')) return;
+        await sb(`chats?id=eq.${c.id}`, { method: 'DELETE' });
+        if (state.chatId === c.id) newChat();
+        loadChats();
+      });
+      list.appendChild(li);
+    }
+  } catch {
+    list.innerHTML = '<li class="none">As conversas ainda não estão ativas no Supabase.</li>';
+  }
+}
+
+async function openSavedChat(id) {
+  if (state.busy) return;
+  const [c] = await sb(`chats?id=eq.${id}&select=*`);
+  if (!c) return;
+  state.chatId = c.id;
+  state.chatTitle = c.title || '';
+  state.display = Array.isArray(c.messages) ? c.messages : [];
+  // Retoma só com o texto (sem blocos internos da sessão anterior).
+  state.history = state.display.map(m => ({ role: m.role, content: m.text }));
+  state.chatIndex = null;
+  $('#messages-inner').innerHTML = '';
+  for (const m of state.display) addMessage(m.role, m.text);
+  if (!state.display.length) chatIntro();
+  document.body.classList.remove('show-chats');
+  loadChats();
+}
+
+function newChat() {
+  state.history = []; state.display = []; state.chatId = null; state.chatTitle = ''; state.chatIndex = null;
+  chatIntro();
+  document.body.classList.remove('show-chats');
+  loadChats();
+}
+$('#new-chat').addEventListener('click', newChat);
+$('#new-chat-m').addEventListener('click', newChat);
+$('#toggle-chats').addEventListener('click', () => document.body.classList.toggle('show-chats'));
+
+// ---------- voz (Web Speech API) ----------
+(() => {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const mic = $('#mic'), hint = $('#voice-hint'), input = $('#input');
+  if (!SR) { mic.classList.add('hidden'); return; }
+  let rec = null, base = '', heard = '';
+  mic.addEventListener('click', () => {
+    if (rec) { rec.stop(); return; }
+    rec = new SR();
+    rec.lang = 'pt-PT';
+    rec.interimResults = true;
+    rec.continuous = false;
+    base = input.value.trim() ? input.value.trim() + ' ' : '';
+    heard = '';
+    rec.onstart = () => { mic.classList.add('listening'); hint.textContent = 'A ouvir… fala à vontade. Carrega outra vez para parar.'; };
+    rec.onresult = e => {
+      heard = [...e.results].map(r => r[0].transcript).join('');
+      input.value = base + heard;
+      input.dispatchEvent(new Event('input'));
+    };
+    rec.onerror = e => {
+      hint.textContent = e.error === 'not-allowed' ? 'Dá permissão ao microfone para usar a voz.' : 'Não percebi — tenta outra vez.';
+    };
+    rec.onend = () => {
+      mic.classList.remove('listening');
+      rec = null;
+      if (heard.trim()) { hint.textContent = ''; $('#composer').requestSubmit(); }
+      else if (!hint.textContent.startsWith('Dá') && !hint.textContent.startsWith('Não')) hint.textContent = '';
+    };
+    rec.start();
+  });
+})();
 
 // ---------- definições ----------
 const dlg = $('#settings');
@@ -972,11 +1033,11 @@ $('#refresh').addEventListener('click', async () => {
 $('#save-settings').addEventListener('click', async () => {
   const before = cfg().provider;
   for (const k of CFG_KEYS) { try { localStorage.setItem('xmem_' + k, $('#' + k).value.trim()); } catch {} }
-  if (cfg().provider !== before) $('#new-chat').click();
+  if (cfg().provider !== before) newChat();
   $('#settings-status').textContent = 'A ligar…';
   try {
     await loadArticles();
-    $('#settings-status').textContent = `Ligado ✅ (${state.articles.length} recortes)`;
+    $('#settings-status').textContent = `Ligado ✓ (${state.articles.length} posts)`;
     setTimeout(() => dlg.close(), 800);
     classifyPending();
   } catch (err) {
@@ -984,7 +1045,7 @@ $('#save-settings').addEventListener('click', async () => {
   }
 });
 $('#reclassify').addEventListener('click', async () => {
-  if (!confirm('Apagar os tópicos atuais e voltar a organizar tudo do zero? (usa a API para todos os recortes)')) return;
+  if (!confirm('Apagar os tópicos atuais e voltar a organizar tudo do zero? (usa a IA para todos os posts)')) return;
   await sb('articles?topics=not.is.null', { method: 'PATCH', body: JSON.stringify({ topics: null }) });
   state.articles.forEach(a => { a.topics = null; });
   dlg.close();
@@ -1017,32 +1078,24 @@ function applySetupLink() {
   if (!m) return false;
   history.replaceState(null, '', location.pathname + location.search);
   try {
-    const json = atob(m[1].replace(/-/g, '+').replace(/_/g, '/'));
-    const data = JSON.parse(json);
+    const data = JSON.parse(atob(m[1].replace(/-/g, '+').replace(/_/g, '/')));
     for (const k of CFG_KEYS) if (data[k]) localStorage.setItem('xmem_' + k, data[k]);
     return true;
   } catch { return false; }
 }
-
 window.addEventListener('hashchange', () => { if (applySetupLink()) location.reload(); });
 
 (async () => {
   if (applySetupLink()) setBanner('Configurado ✓');
-  try {
-    const v = localStorage.getItem('xmem_view');
-    if (v === 'embeds' || v === 'cards') {
-      state.view = v;
-      document.querySelectorAll('.views button').forEach(x => x.classList.toggle('active', x.dataset.view === v));
-    }
-  } catch {}
   chatIntro();
+  try { if (localStorage.getItem('xmem_mode') === 'chat') setMode('chat'); } catch {}
   const c = cfg();
-  if (!c.supabaseUrl || !c.supabaseKey) { render(); openSettings(); return; }
+  if (!c.supabaseKey) { render(); openSettings(); return; }
   try {
     await loadArticles();
     classifyPending();
   } catch (err) {
-    $('#grid').innerHTML = `<div class="msg error">${escapeHtml(err.message)}</div>`;
+    $('#feed').innerHTML = `<div class="msg error">${escapeHtml(err.message)}</div>`;
   }
 })();
 </script>
