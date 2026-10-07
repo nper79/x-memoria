@@ -342,7 +342,7 @@ const state = {
 function cfg() {
   const c = {};
   for (const k of CFG_KEYS) { try { c[k] = localStorage.getItem('xmem_' + k) || ''; } catch { c[k] = ''; } }
-  c.supabaseUrl = c.supabaseUrl.replace(/\/+$/, '');
+  c.supabaseUrl = (c.supabaseUrl || 'https://jwwpazwvhtyivyklvoma.supabase.co').replace(/\/+$/, '');
   c.provider ||= c.apiKey.startsWith('sk-ant-') ? 'anthropic' : 'openrouter';
   c.model = c.model.includes('sonnet') ? 'sonnet' : 'opus';
   c.modelId = MODELS[c.provider][c.model];
@@ -1011,7 +1011,23 @@ document.querySelectorAll('input[type="password"]').forEach(input => {
 });
 
 // ---------- arranque ----------
+// Link de configuração vindo da extensão: https://…/#setup=<base64>. Guarda e apaga do endereço.
+function applySetupLink() {
+  const m = location.hash.match(/^#setup=([\w-]+)/);
+  if (!m) return false;
+  history.replaceState(null, '', location.pathname + location.search);
+  try {
+    const json = atob(m[1].replace(/-/g, '+').replace(/_/g, '/'));
+    const data = JSON.parse(json);
+    for (const k of CFG_KEYS) if (data[k]) localStorage.setItem('xmem_' + k, data[k]);
+    return true;
+  } catch { return false; }
+}
+
+window.addEventListener('hashchange', () => { if (applySetupLink()) location.reload(); });
+
 (async () => {
+  if (applySetupLink()) setBanner('Configurado ✓');
   try {
     const v = localStorage.getItem('xmem_view');
     if (v === 'embeds' || v === 'cards') {
