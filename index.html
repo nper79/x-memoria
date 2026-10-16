@@ -111,6 +111,22 @@
     .m-import { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 18px; font-size: 13px; color: var(--muted); }
     .m-import label { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; color: var(--ink); }
     .m-empty { border: 1px dashed var(--line); border-radius: 14px; padding: 40px 24px; text-align: center; color: var(--muted); }
+    .m-chat { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 18px 20px; margin-bottom: 30px; scroll-margin-top: calc(var(--top) + 12px); }
+    .m-chat-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .m-chat h2 { font-family: var(--serif); font-weight: 400; font-size: 26px; margin: 0; }
+    .m-chat-head button { font-size: 13px; color: var(--muted); }
+    .m-chat .hint { font-size: 13px; color: var(--muted); margin: 4px 0 12px; }
+    #m-messages { display: flex; flex-direction: column; gap: 14px; max-height: 60vh; overflow-y: auto; }
+    #m-messages:empty { display: none; }
+    #m-messages .msg.assistant { font-size: 17px; }
+    .m-suggest { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+    .m-suggest button { border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 13px; color: var(--ink-2); text-align: left; }
+    .m-suggest button:hover { border-color: var(--accent); }
+    .m-form { display: flex; gap: 8px; align-items: flex-end; margin-top: 12px; }
+    .m-form textarea { resize: none; max-height: 200px; }
+    .m-form button { background: var(--ink); color: var(--bg); border-radius: 10px; padding: 10px 16px; font-weight: 600; white-space: nowrap; }
+    .m-form button:disabled { opacity: .5; }
+    .m-ask { margin-top: 16px; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 6px 14px; font-size: 14px; }
     @media (max-width: 760px) {
       .m-wrap { padding: 20px 14px 100px; }
       .m-wrap h1 { font-size: 36px; }
@@ -1392,8 +1408,108 @@ function methodCardHtml(m, i) {
       <div><h4>Como funciona</h4><ol>${m.como.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ol></div>
       <div><h4>Dinheiro nos teus guardados</h4><p>${escapeHtml(m.dinheiro)}</p><h4>Risco</h4><p>${escapeHtml(m.risco)}</p>
         <h4>Para ti <span class="m-fit" title="Encaixe no que já tens">${mSpark(m.encaixe)}</span></h4><p>${escapeHtml(m.porque)}</p></div>
-    </div><h4>Posts que guardaste</h4><div class="m-srcs">${m.fontes.map(methodSourceHtml).join('')}</div></div>
+    </div><h4>Posts que guardaste</h4><div class="m-srcs">${m.fontes.map(methodSourceHtml).join('')}</div>
+    <button class="m-ask" data-mask="${escapeHtml(m.id)}">💬 Conversar sobre este método</button></div>
   </details>`;
+}
+
+// ---------- MÉTODOS: conversa com a IA sobre a análise e os posts de cada método ----------
+const METHODS_CHAT_PROMPT = `És o conselheiro de negócio do Nuno. Ele guardou ${'${total}'} posts no X sobre formas de ganhar dinheiro online. Abaixo está a análise desses posts por métodos (nota de 0 a 10, provas, risco, encaixe) com os posts de origem de cada método, e o foco que foi recomendado.
+
+Quem é o Nuno: escreve em português de Portugal, quer coisas que funcionem com um clique e explicações curtas. Já construiu: reelforge (shorts verticais de ~90 s sobre o Espaço, feitos com IA: Remotion + imagens e voz no fal + crítica automática), Engagement Finder (radar de conversas no X), X Memória (esta app) e uma pesquisa de slideshows do TikTok. Tem muitos projetos e pouca distribuição.
+
+Como respondes:
+- Português de Portugal, direto, frases curtas. Sem rodeios nem listas enormes.
+- Baseia-te nos posts. Quando usares um, põe o link (o url do post) para ele o poder abrir.
+- Separa números autodeclarados (a maioria, muitas vezes de quem vende cursos ou ferramentas) de provas independentes.
+- Se a pergunta for além dos posts, responde com o teu conhecimento mas diz que já não vem dos guardados.
+- Quando ele pedir um plano, dá passos concretos para esta semana, ligados ao que ele já tem.`;
+const mChat = { history: [], display: [], busy: false };
+const M_SUGGESTIONS = ['Qual destes métodos me dá dinheiro mais depressa?', 'Compara o canal faceless com as apps + slideshows.', 'Que posts têm provas mais sólidas?', 'Faz-me um plano para esta semana.'];
+function methodsContext() {
+  const d = methodsData;
+  const fullText = p => {
+    const id = p.url.match(/\/status\/(\d+)/)?.[1];
+    const a = id && state.articles.find(x => x.url.includes(`/status/${id}`));
+    return (a?.text?.length > p.text.length ? a.text : p.text).slice(0, 1500);
+  };
+  const metodos = d.metodos.map(m => `<metodo id="${m.id}" nota="${m.nota}" encaixe="${m.encaixe}/5" guardados="~${m.total}">
+Nome: ${m.nome}
+Resumo: ${m.resumo}
+Como funciona: ${m.como.join(' | ')}
+Dinheiro nos guardados: ${m.dinheiro}
+Prova: ${m.prova} · Custo: ${m.custo} · Até ao dinheiro: ${m.tempo}
+Risco: ${m.risco}
+Para o Nuno: ${m.porque}
+${m.fontes.map(p => `<post url="${p.url}" autor="${p.handle}" likes="${p.likes}" guardados="${p.bookmarks}" data="${(p.date || '').slice(0, 10)}">${fullText(p)}</post>`).join('\n')}
+</metodo>`).join('\n\n');
+  const f = d.foco;
+  const foco = `<foco>\n${f.titulo}\n${f.texto}\nPlano: ${f.plano.map(([w, t]) => `${w}: ${t}`).join(' | ')}\nPadrões: ${f.padroes.map(([t, x]) => `${t}: ${x}`).join(' | ')}\nParar de guardar: ${f.parar.join(' | ')}\n</foco>`;
+  return `${METHODS_CHAT_PROMPT.replace('${total}', d.totalGuardados)}\n\n<analise fonte="${d.fonte}">\n${foco}\n\n${metodos}\n</analise>`;
+}
+function mChatHtml() {
+  const msgs = mChat.display.map(m => `<div class="msg ${m.role}">${renderMarkdown(m.text)}</div>`).join('');
+  return `<section class="m-chat" id="m-chat"><div class="m-chat-head"><h2>Conversar sobre os métodos</h2>${mChat.display.length ? '<button id="m-new">Nova conversa</button>' : ''}</div>
+    <p class="hint">A IA lê a análise e os posts de cada método. Usa a tua chave (⚙).</p>
+    ${mChat.display.length ? '' : `<div class="m-suggest">${M_SUGGESTIONS.map(s => `<button type="button" data-msuggest="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>`}
+    <div id="m-messages">${msgs}</div>
+    <form class="m-form" id="m-form"><textarea id="m-input" rows="1" placeholder="Pergunta sobre os métodos…"></textarea><button id="m-send" ${mChat.busy ? 'disabled' : ''}>Enviar</button></form></section>`;
+}
+function addMMessage(role, text) {
+  const el = document.createElement('div');
+  el.className = `msg ${role}`;
+  el.innerHTML = renderMarkdown(text);
+  const box = $('#m-messages');
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+  return el;
+}
+async function askMethods(question) {
+  const system = methodsContext();
+  mChat.history.push({ role: 'user', content: question });
+  mChat.display.push({ role: 'user', text: question });
+  addMMessage('user', question);
+  let answer = '';
+  if (cfg().provider === 'openrouter') {
+    const wait = addMMessage('activity', 'A pensar…');
+    let choice;
+    try {
+      choice = await openrouter({
+        max_tokens: 16000, reasoning: { effort: 'medium' },
+        messages: [{ role: 'system', content: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }] }, ...mChat.history]
+      });
+    } finally { wait.remove(); }
+    answer = choice.message?.content || '(sem resposta)';
+    mChat.history.push({ role: 'assistant', content: answer });
+    addMMessage('assistant', answer);
+  } else {
+    let bubble = null;
+    const res = await claude({
+      max_tokens: 16000, output_config: { effort: 'medium' }, cache_control: { type: 'ephemeral' },
+      system, messages: mChat.history
+    }, t => { answer += t; bubble ||= addMMessage('assistant', ''); bubble.innerHTML = renderMarkdown(answer); $('#m-messages').scrollTop = $('#m-messages').scrollHeight; });
+    mChat.history.push({ role: 'assistant', content: res.content.length ? res.content : '(sem resposta)' });
+    if (!answer) addMMessage('assistant', '(sem resposta)');
+  }
+  if (answer) mChat.display.push({ role: 'assistant', text: answer });
+}
+async function sendMethodsQuestion(q) {
+  q = q.trim();
+  if (!q || mChat.busy) return;
+  mChat.busy = true; $('#m-send').disabled = true; $('#m-input').value = '';
+  $('.m-suggest')?.remove();
+  try { await askMethods(q); }
+  catch (err) { mChat.history.pop(); mChat.display.pop(); addMMessage('error', err.message); }
+  finally { mChat.busy = false; if ($('#m-send')) $('#m-send').disabled = false; }
+}
+function bindMethodsChat() {
+  $('#m-form').addEventListener('submit', e => { e.preventDefault(); sendMethodsQuestion($('#m-input').value); });
+  $('#m-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey && matchMedia('(min-width: 821px)').matches) { e.preventDefault(); $('#m-form').requestSubmit(); }
+  });
+  $('#m-input').addEventListener('input', e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; });
+  $('#m-new')?.addEventListener('click', () => { if (mChat.busy) return; mChat.history = []; mChat.display = []; renderMethods(); });
+  const box = $('#m-messages'); box.scrollTop = box.scrollHeight;
 }
 const importHtml = label => `<div class="m-import"><label>${label}<input type="file" id="m-file" accept=".json,application/json" hidden></label><span id="m-status"></span></div>`;
 async function renderMethods() {
@@ -1411,12 +1527,14 @@ async function renderMethods() {
     wrap.innerHTML = `<h1>Métodos</h1><p class="m-sub">${escapeHtml(d.fonte)}</p>
       <div class="m-focus"><p class="m-eyebrow">Onde te focar</p><h2>${escapeHtml(f.titulo)}</h2><p>${escapeHtml(f.texto)}</p>
         <ol class="m-plan">${f.plano.map(([w, t]) => `<li><b>${escapeHtml(w)}</b>${escapeHtml(t)}</li>`).join('')}</ol></div>
+      ${mChatHtml()}
       <div class="m-bar-head"><h2>Todos os métodos</h2><div class="m-sort"><button data-msort="nota" class="${methodSort === 'nota' ? 'on' : ''}">Por nota</button><button data-msort="total" class="${methodSort === 'total' ? 'on' : ''}">Por guardados</button></div></div>
       <div class="m-table">${list.map((m, i) => `<button data-mopen="${escapeHtml(m.id)}"><span class="m-rank">${m.nota === 0 ? '✕' : i + 1}</span><b>${escapeHtml(m.nome)}</b><span class="m-meter"><i style="width:${m.nota * 10}%"></i></span><em>${m.nota}</em><small>≈ ${m.total}</small></button>`).join('')}</div>
       ${list.map(methodCardHtml).join('')}
       <div class="m-side"><section><h3>O que os teus guardados repetem</h3>${f.padroes.map(([t, x]) => `<p><b>${escapeHtml(t)}.</b> ${escapeHtml(x)}</p>`).join('')}</section>
         <section><h3>Pára de guardar</h3>${f.parar.map(x => `<p>✕ ${escapeHtml(x)}</p>`).join('')}<p class="muted">${d.totalGuardados} guardados · análise de ${escapeHtml(d.geradoEm)}</p></section></div>
       ${importHtml('Atualizar análise (ficheiro .json)')}`;
+    bindMethodsChat();
   }
   $('#m-file').addEventListener('change', async e => {
     const file = e.target.files[0]; if (!file) return;
@@ -1426,6 +1544,18 @@ async function renderMethods() {
   });
 }
 $('#methods').addEventListener('click', e => {
+  const sug = e.target.closest('[data-msuggest]');
+  if (sug) { sendMethodsQuestion(sug.dataset.msuggest); return; }
+  const askBtn = e.target.closest('[data-mask]');
+  if (askBtn) {
+    const m = methodsData.metodos.find(x => x.id === askBtn.dataset.mask);
+    $('#m-chat').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const input = $('#m-input');
+    input.value = `Sobre «${m.nome}»: `;
+    input.dispatchEvent(new Event('input'));
+    setTimeout(() => { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }, 400);
+    return;
+  }
   const sort = e.target.closest('[data-msort]');
   if (sort) { methodSort = sort.dataset.msort; renderMethods(); return; }
   const open = e.target.closest('[data-mopen]');
