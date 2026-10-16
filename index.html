@@ -53,6 +53,74 @@
     .hidden { display: none !important; }
     .muted { color: var(--muted); }
 
+    /* ---------- MÉTODOS ---------- */
+    #methods.mode.active { display: block; }
+    .m-wrap { max-width: 980px; margin: 0 auto; padding: 32px 24px 100px; }
+    .m-wrap h1 { font-family: var(--serif); font-weight: 400; font-size: 44px; line-height: 1.05; margin: 0 0 6px; }
+    .m-sub { color: var(--muted); font-size: 14px; margin: 0 0 26px; }
+    .m-focus { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 14px; padding: 22px 24px; margin-bottom: 30px; }
+    .m-eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin: 0 0 8px; }
+    .m-focus h2 { font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.15; margin: 0 0 10px; }
+    .m-focus > p { color: var(--ink-2); margin: 0 0 18px; }
+    .m-plan { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .m-plan li { border: 1px solid var(--line); border-radius: 10px; padding: 12px; font-size: 14px; line-height: 1.5; }
+    .m-plan b { display: block; color: var(--accent); font-size: 12px; margin-bottom: 4px; }
+    .m-bar-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 10px; }
+    .m-bar-head h2 { font-family: var(--serif); font-weight: 400; font-size: 28px; margin: 0; }
+    .m-sort { display: flex; gap: 4px; }
+    .m-sort button { border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 13px; color: var(--muted); }
+    .m-sort button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .m-table { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 4px; margin-bottom: 26px; }
+    .m-table button { display: grid; grid-template-columns: 28px minmax(0, 1fr) 110px 28px 56px; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 9px 10px; border-radius: 9px; font-size: 14.5px; }
+    .m-table button:hover { background: var(--accent-soft); }
+    .m-table b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .m-table em { font-style: normal; font-weight: 700; text-align: right; }
+    .m-table small { color: var(--muted); text-align: right; font-size: 12px; }
+    .m-meter { height: 6px; background: var(--line); border-radius: 4px; overflow: hidden; }
+    .m-meter i { display: block; height: 100%; background: var(--accent); }
+    .m-rank { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; }
+    .m-card { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); margin-bottom: 12px; }
+    .m-card summary { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; cursor: pointer; list-style: none; }
+    .m-card summary::-webkit-details-marker { display: none; }
+    .m-card[open] summary { border-bottom: 1px solid var(--line); }
+    .m-card.avoid .m-rank { background: #b3261e1a; color: #b3261e; }
+    .m-t { flex: 1; min-width: 0; }
+    .m-t h3 { font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1.15; margin: 0 0 6px; }
+    .m-t p { margin: 0; color: var(--ink-2); font-size: 15px; }
+    .m-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .m-tags span { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; }
+    .m-score { font-family: var(--serif); font-size: 34px; line-height: 1; color: var(--accent); white-space: nowrap; }
+    .m-score small { font-family: var(--ui); font-size: 12px; color: var(--muted); }
+    .m-body { padding: 4px 20px 20px; }
+    .m-body h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 0 6px; }
+    .m-body p, .m-body li { font-size: 15px; line-height: 1.6; }
+    .m-body p { margin: 0; }
+    .m-body ol { margin: 0; padding-left: 20px; }
+    .m-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+    .m-fit { color: var(--accent); letter-spacing: 2px; margin-left: 6px; }
+    .m-srcs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .m-src { display: block; border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; color: var(--ink); text-decoration: none; font-size: 14px; line-height: 1.5; }
+    .m-src:hover { border-color: var(--accent); }
+    .m-src b { color: var(--accent); font-weight: 600; display: block; font-size: 13px; }
+    .m-src span { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .m-src small { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .m-side { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+    .m-side section { border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+    .m-side h3 { font-family: var(--serif); font-weight: 400; font-size: 22px; margin: 0 0 10px; }
+    .m-side p { font-size: 14.5px; margin: 0 0 8px; color: var(--ink-2); }
+    .m-import { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 18px; font-size: 13px; color: var(--muted); }
+    .m-import label { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; color: var(--ink); }
+    .m-empty { border: 1px dashed var(--line); border-radius: 14px; padding: 40px 24px; text-align: center; color: var(--muted); }
+    @media (max-width: 760px) {
+      .m-wrap { padding: 20px 14px 100px; }
+      .m-wrap h1 { font-size: 36px; }
+      .m-plan, .m-cols, .m-srcs, .m-side { grid-template-columns: 1fr; }
+      .m-table button { grid-template-columns: 26px minmax(0, 1fr) 28px; }
+      .m-table .m-meter, .m-table small { display: none; }
+      .m-card summary { padding: 16px; }
+      .m-body { padding: 4px 16px 16px; }
+    }
+
     /* ---------- barra de topo ---------- */
     .top {
       position: sticky; top: 0; z-index: 20; height: var(--top);
@@ -322,6 +390,7 @@
     <nav class="modes">
       <button data-mode="read" class="active">Ler</button>
       <button data-mode="chat">Conversar</button>
+      <button data-mode="methods">Métodos</button>
     </nav>
     <div class="top-right">
       <span id="banner"></span>
@@ -374,6 +443,9 @@
       </div>
     </div>
   </section>
+
+  <!-- ===== MÉTODOS (análise dos guardados, guardada no Supabase como artigo source='metodos') ===== -->
+  <section id="methods" class="mode"><div class="m-wrap" id="m-wrap"></div></section>
 
   <section id="post-view" class="post-view" aria-label="Post">
     <div class="pv-bar"><button id="post-close" class="pv-close">← Voltar</button></div>
@@ -508,7 +580,7 @@ async function sb(path, opts = {}) {
 async function loadArticles() {
   const rows = [];
   for (let from = 0; ; from += 1000) {
-    const page = await sb('articles?select=*&order=saved_at.desc', { headers: { Range: `${from}-${from + 999}` } });
+    const page = await sb('articles?select=*&or=(source.is.null,source.neq.metodos)&order=saved_at.desc', { headers: { Range: `${from}-${from + 999}` } });
     rows.push(...page);
     if (page.length < 1000) break;
   }
@@ -1287,7 +1359,80 @@ function setMode(mode) {
   document.body.classList.remove('show-chats');
   try { localStorage.setItem('xmem_mode', mode); } catch {}
   if (mode === 'chat') { loadChats(); setTimeout(() => $('#input').focus(), 50); }
+  if (mode === 'methods') renderMethods();
 }
+
+// ---------- MÉTODOS ----------
+// A análise é um JSON (feito pelo Claude a partir dos guardados) guardado na tabela articles com source='metodos'.
+const METHODS_URL = 'xmemoria://metodos';
+let methodsData, methodSort = 'nota';
+async function loadMethods() {
+  const rows = await sb(`articles?select=text,saved_at&url=eq.${encodeURIComponent(METHODS_URL)}`);
+  methodsData = rows?.[0] ? JSON.parse(rows[0].text) : null;
+}
+async function importMethods(file) {
+  const data = JSON.parse(await file.text());
+  if (data.tipo !== 'xmemoria-metodos' || !Array.isArray(data.metodos)) throw new Error('Este ficheiro não é uma análise de métodos.');
+  await sb('articles?on_conflict=url', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify([{ url: METHODS_URL, source: 'metodos', title: 'Análise: métodos dos guardados', text: JSON.stringify(data), saved_at: new Date().toISOString() }]) });
+  methodsData = data;
+}
+const mSpark = n => '●'.repeat(n) + '○'.repeat(5 - n);
+function methodSourceHtml(p) {
+  const id = p.url.match(/\/status\/(\d+)/)?.[1] || '';
+  const meta = [`♡ ${p.likes.toLocaleString('pt-PT')}`, `☆ ${p.bookmarks.toLocaleString('pt-PT')}`, p.date ? fmtDate(p.date) : ''].filter(Boolean).join(' · ');
+  return `<a class="m-src" href="${escapeHtml(p.url)}" data-status="${id}" target="_blank" rel="noopener"><b>${escapeHtml(p.handle)}</b><span>${escapeHtml(p.text)}</span><small>${meta}</small></a>`;
+}
+function methodCardHtml(m, i) {
+  const rank = m.nota === 0 ? '✕' : i + 1;
+  return `<details class="m-card${m.nota === 0 ? ' avoid' : ''}" id="m-${escapeHtml(m.id)}"${i === 0 ? ' open' : ''}>
+    <summary><span class="m-rank">${rank}</span><div class="m-t"><h3>${escapeHtml(m.nome)}</h3><p>${escapeHtml(m.resumo)}</p>
+      <div class="m-tags"><span>≈ ${m.total} guardados</span><span>Prova: ${escapeHtml(m.prova)}</span><span>Custo: ${escapeHtml(m.custo)}</span><span>Até ao dinheiro: ${escapeHtml(m.tempo)}</span></div></div>
+      <span class="m-score">${m.nota}<small>/10</small></span></summary>
+    <div class="m-body"><div class="m-cols">
+      <div><h4>Como funciona</h4><ol>${m.como.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ol></div>
+      <div><h4>Dinheiro nos teus guardados</h4><p>${escapeHtml(m.dinheiro)}</p><h4>Risco</h4><p>${escapeHtml(m.risco)}</p>
+        <h4>Para ti <span class="m-fit" title="Encaixe no que já tens">${mSpark(m.encaixe)}</span></h4><p>${escapeHtml(m.porque)}</p></div>
+    </div><h4>Posts que guardaste</h4><div class="m-srcs">${m.fontes.map(methodSourceHtml).join('')}</div></div>
+  </details>`;
+}
+const importHtml = label => `<div class="m-import"><label>${label}<input type="file" id="m-file" accept=".json,application/json" hidden></label><span id="m-status"></span></div>`;
+async function renderMethods() {
+  const wrap = $('#m-wrap');
+  if (methodsData === undefined) {
+    wrap.innerHTML = '<div class="m-empty">A carregar…</div>';
+    try { await loadMethods(); } catch (err) { wrap.innerHTML = `<div class="msg error">${escapeHtml(err.message)}</div>`; return; }
+  }
+  const d = methodsData;
+  if (!d) {
+    wrap.innerHTML = `<h1>Métodos</h1><p class="m-sub">O que os teus guardados dizem sobre ganhar dinheiro.</p><div class="m-empty"><p>Ainda não há análise.</p>${importHtml('Escolher o ficheiro metodos-x-memoria.json')}</div>`;
+  } else {
+    const f = d.foco;
+    const list = [...d.metodos].sort((a, b) => (a.nota === 0) - (b.nota === 0) || (methodSort === 'total' ? b.total - a.total : b.nota - a.nota || b.total - a.total));
+    wrap.innerHTML = `<h1>Métodos</h1><p class="m-sub">${escapeHtml(d.fonte)}</p>
+      <div class="m-focus"><p class="m-eyebrow">Onde te focar</p><h2>${escapeHtml(f.titulo)}</h2><p>${escapeHtml(f.texto)}</p>
+        <ol class="m-plan">${f.plano.map(([w, t]) => `<li><b>${escapeHtml(w)}</b>${escapeHtml(t)}</li>`).join('')}</ol></div>
+      <div class="m-bar-head"><h2>Todos os métodos</h2><div class="m-sort"><button data-msort="nota" class="${methodSort === 'nota' ? 'on' : ''}">Por nota</button><button data-msort="total" class="${methodSort === 'total' ? 'on' : ''}">Por guardados</button></div></div>
+      <div class="m-table">${list.map((m, i) => `<button data-mopen="${escapeHtml(m.id)}"><span class="m-rank">${m.nota === 0 ? '✕' : i + 1}</span><b>${escapeHtml(m.nome)}</b><span class="m-meter"><i style="width:${m.nota * 10}%"></i></span><em>${m.nota}</em><small>≈ ${m.total}</small></button>`).join('')}</div>
+      ${list.map(methodCardHtml).join('')}
+      <div class="m-side"><section><h3>O que os teus guardados repetem</h3>${f.padroes.map(([t, x]) => `<p><b>${escapeHtml(t)}.</b> ${escapeHtml(x)}</p>`).join('')}</section>
+        <section><h3>Pára de guardar</h3>${f.parar.map(x => `<p>✕ ${escapeHtml(x)}</p>`).join('')}<p class="muted">${d.totalGuardados} guardados · análise de ${escapeHtml(d.geradoEm)}</p></section></div>
+      ${importHtml('Atualizar análise (ficheiro .json)')}`;
+  }
+  $('#m-file').addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file) return;
+    $('#m-status').textContent = 'A guardar…';
+    try { await importMethods(file); renderMethods(); setBanner('Análise guardada ✓'); }
+    catch (err) { $('#m-status').textContent = err.message; }
+  });
+}
+$('#methods').addEventListener('click', e => {
+  const sort = e.target.closest('[data-msort]');
+  if (sort) { methodSort = sort.dataset.msort; renderMethods(); return; }
+  const open = e.target.closest('[data-mopen]');
+  if (open) { const el = document.getElementById('m-' + open.dataset.mopen); if (el) { el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
+  const src = e.target.closest('a.m-src');
+  if (src?.dataset.status) { e.preventDefault(); openPostByStatus(src.dataset.status, src.href); }
+});
 document.querySelectorAll('.modes button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
 
 // ---------- CONVERSAR: mensagens ----------
@@ -1814,9 +1959,11 @@ window.addEventListener('hashchange', () => { if (applySetupLink()) location.rel
 (async () => {
   if (applySetupLink()) setBanner('Configurado ✓');
   chatIntro();
-  try { if (localStorage.getItem('xmem_mode') === 'chat') setMode('chat'); } catch {}
+  const savedMode = (() => { try { return localStorage.getItem('xmem_mode'); } catch { return null; } })();
+  if (savedMode === 'chat') setMode('chat');
   const c = cfg();
   if (!c.supabaseKey) { render(); openSettings(); return; }
+  if (savedMode === 'methods') setMode('methods');
   try {
     await loadArticles();
     classifyPending();
